@@ -65,63 +65,10 @@ In particular, *step 5* of RFC section 5.4.3 is defined as:
 
     str = str || ad || challenge_generation_domain_separator_back
 
-## 3.1. Sign
+## 3.1. Setup
 
-**Inputs**:
-
-- $sk$: Secret key $\in \F$
-- $input$: $Input \in \G$
-- $ad$: Additional data octet-string
-
-**Outputs**:
-
-- $output$: $Output \in \G$
-- $proof$: A *Schnorr-like* proof $\in (\F, \F)$
-
-**Steps**:
-
-1. $preout \leftarrow sk \cdot input$
-2. $k \leftarrow nonce(sk, input)$
-3. $c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)$
-4. $s \leftarrow (k + c \cdot x)$
-5. $proof \leftarrow (c, s)$
-5. **return** $(preout, proof)$
-
-**Externals**:
-
-- $nonce$: refer to [RFC9381] section 5.4.2
-- $challenge$: refer to [RFC9381] section 5.4.3
-
-## 3.2. Verify
-
-**Inputs**:  
-
-- $pk$: Public key $\in \G$
-- $input$: $Input \in \G$
-- $ad$: Additional data octet-string
-- $output$: $Output \in \G$
-- $proof$: As defined for $Sign$ output.
-
-**Outputs**:  
-
-- True if proof is valid, False otherwise.  
-
-**Steps**:
-
-1. $(c, s) \leftarrow proof$
-2. $U \leftarrow s \cdot K - c \cdot pk$
-3. $V \leftarrow s \cdot H - c \cdot preout$
-4. $c' \leftarrow challenge(pk, input, output, U, V)$
-5. **if** $c \neq c'$ **then** **return** False
-6. **return** True
-
-**Externals**:
-
-- $challenge$: as defined for $Sign$
-
-## 3.3. Bandersnatch Cipher Suite
-
-Suite specification follows [RFC9381] section 5.5 guidelines and naming conventions.
+Setup follows from the *"cipher suite"* specification defined by faithfully
+following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 - The EC group $\G$ is the prime subgroup of the Bandersnatch elliptic curve,
   in Twisted Edwards form, with the finite field and curve parameters as specified in
@@ -168,6 +115,60 @@ Suite specification follows [RFC9381] section 5.5 guidelines and naming conventi
   Section 5.4.1.2, with `h2c_suite_ID_string` = `"BANDERSNATCH_XMD:SHA-512_ELL2_RO_"`.
   The suite must be interpreted as defined by Section 8.5 of [RFC9380](https://datatracker.ietf.org/doc/rfc9380/)
   and using the domain separation tag `DST = "ECVRF_" || h2c_suite_ID_string || suite_string`.
+
+## 3.2. Sign
+
+**Inputs**:
+
+- $sk$: Secret key $\in \F$
+- $input$: $Input \in \G$
+- $ad$: Additional data octet-string
+
+**Outputs**:
+
+- $output$: $Output \in \G$
+- $proof$: A *Schnorr-like* proof $\in (\F, \F)$
+
+**Steps**:
+
+1. $preout \leftarrow sk \cdot input$
+2. $k \leftarrow nonce(sk, input)$
+3. $c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)$
+4. $s \leftarrow (k + c \cdot x)$
+5. $proof \leftarrow (c, s)$
+5. **return** $(preout, proof)$
+
+**Externals**:
+
+- $nonce$: refer to [RFC9381] section 5.4.2
+- $challenge$: refer to [RFC9381] section 5.4.3
+
+## 3.3. Verify
+
+**Inputs**:  
+
+- $pk$: Public key $\in \G$
+- $input$: $Input \in \G$
+- $ad$: Additional data octet-string
+- $output$: $Output \in \G$
+- $proof$: As defined for $Sign$ output.
+
+**Outputs**:  
+
+- True if proof is valid, False otherwise.  
+
+**Steps**:
+
+1. $(c, s) \leftarrow proof$
+2. $U \leftarrow s \cdot K - c \cdot pk$
+3. $V \leftarrow s \cdot H - c \cdot preout$
+4. $c' \leftarrow challenge(pk, input, output, U, V)$
+5. **if** $c \neq c'$ **then** **return** False
+6. **return** True
+
+**Externals**:
+
+- $challenge$: as defined for $Sign$
 
 
 # 4. Pedersen VRF

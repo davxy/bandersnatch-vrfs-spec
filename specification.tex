@@ -135,124 +135,11 @@ In particular, \emph{step 5} of RFC section 5.4.3 is defined as:
 str = str || ad || challenge_generation_domain_separator_back
 \end{verbatim}
 
-\hypertarget{sign}{%
-\subsection{3.1. Sign}\label{sign}}
+\hypertarget{setup}{%
+\subsection{3.1. Setup}\label{setup}}
 
-\textbf{Inputs}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(sk\): Secret key \(\in \mathbb{Z}^*_r\)
-\item
-  \(input\): \(Input \in \langle G \rangle\)
-\item
-  \(ad\): Additional data octet-string
-\end{itemize}
-
-\textbf{Outputs}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(output\): \(Output \in \langle G \rangle\)
-\item
-  \(proof\): A \emph{Schnorr-like} proof
-  \(\in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
-\end{itemize}
-
-\textbf{Steps}:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \(preout \leftarrow sk \cdot input\)
-\item
-  \(k \leftarrow nonce(sk, input)\)
-\item
-  \(c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)\)
-\item
-  \(s \leftarrow (k + c \cdot x)\)
-\item
-  \(proof \leftarrow (c, s)\)
-\item
-  \textbf{return} \((preout, proof)\)
-\end{enumerate}
-
-\textbf{Externals}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(nonce\): refer to
-  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
-  5.4.2
-\item
-  \(challenge\): refer to
-  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
-  5.4.3
-\end{itemize}
-
-\hypertarget{verify}{%
-\subsection{3.2. Verify}\label{verify}}
-
-\textbf{Inputs}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(pk\): Public key \(\in \langle G \rangle\)
-\item
-  \(input\): \(Input \in \langle G \rangle\)
-\item
-  \(ad\): Additional data octet-string
-\item
-  \(output\): \(Output \in \langle G \rangle\)
-\item
-  \(proof\): As defined for \(Sign\) output.
-\end{itemize}
-
-\textbf{Outputs}:
-
-\begin{itemize}
-\tightlist
-\item
-  True if proof is valid, False otherwise.
-\end{itemize}
-
-\textbf{Steps}:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \((c, s) \leftarrow proof\)
-\item
-  \(U \leftarrow s \cdot K - c \cdot pk\)
-\item
-  \(V \leftarrow s \cdot H - c \cdot preout\)
-\item
-  \(c' \leftarrow challenge(pk, input, output, U, V)\)
-\item
-  \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
-\item
-  \textbf{return} True
-\end{enumerate}
-
-\textbf{Externals}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(challenge\): as defined for \(Sign\)
-\end{itemize}
-
-\hypertarget{bandersnatch-cipher-suite}{%
-\subsection{3.3. Bandersnatch Cipher
-Suite}\label{bandersnatch-cipher-suite}}
-
-Suite specification follows
+Setup follows from the \emph{``cipher suite''} specification defined by
+faithfully following the
 \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section 5.5
 guidelines and naming conventions.
 
@@ -328,6 +215,119 @@ guidelines and naming conventions.
   \texttt{DST\ =\ "ECVRF\_"\ \textbar{}\textbar{}\ h2c\_suite\_ID\_string\ \textbar{}\textbar{}\ suite\_string}.
 \end{itemize}
 
+\hypertarget{sign}{%
+\subsection{3.2. Sign}\label{sign}}
+
+\textbf{Inputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(sk\): Secret key \(\in \mathbb{Z}^*_r\)
+\item
+  \(input\): \(Input \in \langle G \rangle\)
+\item
+  \(ad\): Additional data octet-string
+\end{itemize}
+
+\textbf{Outputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(output\): \(Output \in \langle G \rangle\)
+\item
+  \(proof\): A \emph{Schnorr-like} proof
+  \(\in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(preout \leftarrow sk \cdot input\)
+\item
+  \(k \leftarrow nonce(sk, input)\)
+\item
+  \(c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)\)
+\item
+  \(s \leftarrow (k + c \cdot x)\)
+\item
+  \(proof \leftarrow (c, s)\)
+\item
+  \textbf{return} \((preout, proof)\)
+\end{enumerate}
+
+\textbf{Externals}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(nonce\): refer to
+  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
+  5.4.2
+\item
+  \(challenge\): refer to
+  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
+  5.4.3
+\end{itemize}
+
+\hypertarget{verify}{%
+\subsection{3.3. Verify}\label{verify}}
+
+\textbf{Inputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(pk\): Public key \(\in \langle G \rangle\)
+\item
+  \(input\): \(Input \in \langle G \rangle\)
+\item
+  \(ad\): Additional data octet-string
+\item
+  \(output\): \(Output \in \langle G \rangle\)
+\item
+  \(proof\): As defined for \(Sign\) output.
+\end{itemize}
+
+\textbf{Outputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  True if proof is valid, False otherwise.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \((c, s) \leftarrow proof\)
+\item
+  \(U \leftarrow s \cdot K - c \cdot pk\)
+\item
+  \(V \leftarrow s \cdot H - c \cdot preout\)
+\item
+  \(c' \leftarrow challenge(pk, input, output, U, V)\)
+\item
+  \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
+\item
+  \textbf{return} True
+\end{enumerate}
+
+\textbf{Externals}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(challenge\): as defined for \(Sign\)
+\end{itemize}
+
 \hypertarget{pedersen-vrf}{%
 \section{4. Pedersen VRF}\label{pedersen-vrf}}
 
@@ -342,8 +342,8 @@ cryptographic commitment to the public key. And it could be unblinded to
 prove that the output of the VRF corresponds to the public key of the
 signer.
 
-\hypertarget{setup}{%
-\subsection{4.1. Setup}\label{setup}}
+\hypertarget{setup-1}{%
+\subsection{4.1. Setup}\label{setup-1}}
 
 Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of an
 elliptic curve \(E\) with \(K, B \in \langle G \rangle\) defined to be
@@ -550,8 +550,8 @@ With \(PointToString\) and \(StringToInt\) defined as
 
 Anonymized ring VRFs based of {[}Pedersen VRF{]} and \ldots{}
 
-\hypertarget{setup-1}{%
-\subsection{5.1. Setup}\label{setup-1}}
+\hypertarget{setup-2}{%
+\subsection{5.1. Setup}\label{setup-2}}
 
 Setup for plain {[}Pedersen VRF{]} applies.
 
@@ -567,13 +567,13 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
-  \(sb\): Blinding factor \(\in F\) (can be random)
+  \(sb\): Blinding factor \(\in \mathbb{Z}^*_r\) (can be random)
 \item
-  \(input\): \(VRFInput \in G\).
+  \(input\): \(Input \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \(P\): ring prover key
+  \(P\): Ring prover key
 \end{itemize}
 
 \textbf{Output}:
@@ -581,7 +581,11 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \((preout, pedersen-proof, zk-proof)\)
+  \(output\): \(Output \in \langle G \rangle\).
+\item
+  \(pproof\): Pedersen proof as specified in Pedersen VRF spec.
+\item
+  \(zproof\): Ring proof (TODO)
 \end{itemize}
 
 \textbf{Steps}:
@@ -590,9 +594,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((preout, pedersen-proof) \leftarrow PedersenSign(sk, sb, input, ad)\)
+  \((output, pproof) \leftarrow PedersenSign(sk, sb, input, ad)\)
 \item
-  ring-proof: TODO
+  \(zproof \leftarrow RingProve(...)\) (TODO)
 \end{enumerate}
 
 \hypertarget{verify-2}{%
@@ -603,17 +607,17 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(pk\): VRF verification key corresponds to \(sk\) \(\in G\).
+  \(input\): \(Input \in \langle G \rangle\).
 \item
-  \(input\): \(VRFInput \in G\).
-\item
-  \(preout\): \(VRFPreOutput \in G\).
+  \(output\): \(Output \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \(P\): ring prover key
+  \(V\): ring verifier key \(\in ?\)
 \item
-  \((pproof, rproof)\) proofs yielded by \(Sign\).
+  \(pproof\): Pedersen proof as defined in Pedersen VRF spec
+\item
+  \(zproof\): Ring proof \(\in ?\)
 \end{itemize}
 
 \textbf{Output}:
@@ -627,11 +631,45 @@ TODO: - SRS for zk-SNARK definition - All the details
 \textbf{Steps}:
 
 \begin{itemize}
-\tightlist
 \item
-  PedersenVerify(pk, input, preout, ad, pedersen-proof)
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \tightlist
+  \item
+    \(res = PedersenVerify(pk, input, preout, ad, pproof)\)
+  \end{enumerate}
 \item
-  verify ring-proof
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \setcounter{enumi}{1}
+  \tightlist
+  \item
+    \textbf{if} \(res \neq True\) \textbf{return} False
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \setcounter{enumi}{2}
+  \tightlist
+  \item
+    \(res = RingVerify(...)\) (TODO)
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \setcounter{enumi}{3}
+  \tightlist
+  \item
+    \textbf{if} \(res \neq True\) \textbf{return} False
+  \end{enumerate}
+\item
+  \begin{enumerate}
+  \def\labelenumi{\arabic{enumi}.}
+  \setcounter{enumi}{3}
+  \tightlist
+  \item
+    \textbf{return} True
+  \end{enumerate}
 \end{itemize}
 
 \hypertarget{references}{%
