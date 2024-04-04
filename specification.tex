@@ -416,7 +416,7 @@ In twisted Edwards coordinates.
 \item
   \(sb \leftarrow random()\)
 \item
-  \(compk \leftarrow sk \cdot K + sb \cdot B\)
+  \(compk \leftarrow sk \cdot G + sb \cdot B\)
 \item
   \(c \leftarrow challenge(compk, KBrand, POrand, ad)\)
 \item
@@ -478,7 +478,7 @@ In twisted Edwards coordinates.
 \item
   \textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False
 \item
-  \(z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B\)
+  \(z2 \leftarrow KBrand + c \cdot compk - krand \cdot G - brand \cdot B\)
 \item
   \textbf{if} \(z2 \neq O\) \textbf{then} \textbf{return} False
 \item
@@ -565,8 +565,6 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
-  \(sb\): Blinding factor \(\in \mathbb{Z}^*_r\) (can be random)
-\item
   \(input\): \(Input \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
@@ -592,7 +590,7 @@ TODO: - SRS for zk-SNARK definition - All the details
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((output, pproof) \leftarrow PedersenSign(sk, sb, input, ad)\)
+  \((output, pproof) \leftarrow PedersenSign(sk, input, ad)\)
 \item
   \(zproof \leftarrow RingProve(...)\) (TODO)
 \end{enumerate}

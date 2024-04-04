@@ -219,7 +219,7 @@ In twisted Edwards coordinates.
 4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
 5. $POrand \leftarrow krand \cdot input$
 6. $sb \leftarrow random()$
-7. $compk \leftarrow sk \cdot K + sb \cdot B$
+7. $compk \leftarrow sk \cdot G + sb \cdot B$
 8. $c \leftarrow challenge(compk, KBrand, POrand, ad)$
 9. $ks \leftarrow krand + c \cdot sk$
 10. $bs \leftarrow brand + c \cdot sb$
@@ -250,7 +250,7 @@ In twisted Edwards coordinates.
 2. $c \rightarrow challenge(compk, KBrand, POrand, ad)$
 3. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
 4. **if** $z1 \neq O$ **then** **return** False
-5. $z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B$
+5. $z2 \leftarrow KBrand + c \cdot compk - krand \cdot G - brand \cdot B$
 6. **if** $z2 \neq O$ **then** **return** False
 7. **return** True
 
@@ -302,7 +302,6 @@ TODO:
 **Inputs**:
 
 - $sk$: Secret key $\in \F$.
-- $sb$: Blinding factor $\in \F$ (can be random)
 - $input$: $Input \in \G$.
 - $ad$: Additional data octet-string
 - $P$: Ring prover key
@@ -315,7 +314,7 @@ TODO:
 
 **Steps**:
 
-1. $(output, pproof) \leftarrow PedersenSign(sk, sb, input, ad)$
+1. $(output, pproof) \leftarrow PedersenSign(sk, input, ad)$
 2. $zproof \leftarrow RingProve(...)$ (TODO)
 
 ## 5.3. Verify
