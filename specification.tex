@@ -36,6 +36,8 @@
 \IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
+  pdftitle={Bandersnatch VRF-AD Specification},
+  pdfauthor={Davide Galassi; Seyed Hosseini},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
@@ -47,13 +49,14 @@
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
 
-\author{}
+\title{Bandersnatch VRF-AD Specification}
+\author{Davide Galassi \and Seyed Hosseini}
 \date{}
 
 \begin{document}
+\maketitle
 
-\hypertarget{bandersnatch-vrfs}{%
-\section{Bandersnatch VRFs}\label{bandersnatch-vrfs}}
+Draft 1 - 04-04-2024
 
 \hypertarget{introduction}{%
 \subsection{Introduction}\label{introduction}}
@@ -64,17 +67,17 @@ data (VRF-AD)} can be described with four functions:
 \begin{itemize}
 \tightlist
 \item
-  \(VRF.KeyGen: () \mapsto (pk,sk)\) where \(pk\) is a public key and
-  \(sk\) is its corresponding secret key.
+  \(KeyGen: () \mapsto (pk,sk)\) where \(pk\) is a public key and \(sk\)
+  is its corresponding secret key.
 \item
-  \(VRF.Sign : (sk,msg,ad) \mapsto \pi\) takes a secret key \(sk\), an
-  input \(msg\), and additional data \(ad\), and returns a VRF signature
+  \(Sign : (sk,msg,ad) \mapsto \pi\) takes a secret key \(sk\), an input
+  \(msg\), and additional data \(ad\), and returns a VRF signature
   \(\pi\).
 \item
-  \(VRF.Eval : (sk, msg) \mapsto Out\) takes a secret key \(sk\) and an
+  \(Eval : (sk, msg) \mapsto Out\) takes a secret key \(sk\) and an
   input \(msg\), and returns a VRF output \(out\).
 \item
-  \(VRF.Verify: (pk,msg,aux,\pi) \mapsto (out|prep)\) for a public key
+  \(Verify: (pk,msg,aux,\pi) \mapsto (out|prep)\) for a public key
   \(pk\), an input \(msg\), and additional data \(ad\), and then returns
   either an output \(out\) or else failure \(perp\).
 \end{itemize}
@@ -88,13 +91,21 @@ All VRFs described in this specification are EC-VRF.
 
 For input \(msg\) and \(ad\) additional data first we compute the
 \(VRFInput\) which is a point on elliptic curve \(E\) as follows:
-\[ t \leftarrow Transcript(msg) \]
-\[ VRFInput := H2C(challange(t, "vrf-input") \]
+\(t \leftarrow Transcript(msg)\)
+\(VrfInput := H2C(challange(t, "vrf-input")\)
 
-Where: - \(transcript\) function is described in
-{[}{[}ark-transcript{]}{]} section. - \(H2C: B \rightarrow G\) is a hash
-to curve function correspond to curve \(E\) specified in Section
-{[}{[}hash-to-curve{]}{]} for the specific choice of \(E\)
+Where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(transcript\) function is described in {[}{[}ark-transcript{]}{]}
+  section.
+\item
+  \(H2C: B \rightarrow G\) is a hash to curve function correspond to
+  curve \(E\) specified in Section {[}{[}hash-to-curve{]}{]} for the
+  specific choice of \(E\)
+\end{itemize}
 
 \hypertarget{vrf-input}{%
 \subsubsection{VRF Input}\label{vrf-input}}
@@ -271,7 +282,7 @@ base} respectively.
 \item
   \(compk = sk \cdot K + sb \cdot B\)
 \item
-  \(c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)\)
+  \(c \rightarrow Challenge(compk, KBrand, POrand, ad)\)
 \item
   \(ks \rightarrow krand + c \cdot sk\)
 \item
@@ -313,7 +324,7 @@ base} respectively.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)\)
+  \(c \rightarrow Challenge(compk, KBrand, POrand, ad)\)
 \item
   \(z1 \leftarrow POrand + c \cdot preout - input \cdot ks\)
 \item
@@ -332,5 +343,56 @@ base} respectively.
 
 NOTE: I don't think step 3 and 6 are necessary, we're working in the
 prime subgroup.
+
+\hypertarget{challenge}{%
+\subsubsection{Challenge}\label{challenge}}
+
+Defined similarly to the procedure specified by section 5.4.3 of
+\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
+
+\textbf{Inputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(points\): Sequence of points to include in the challenge.
+\item
+  \(ad\): Additional data octet-string
+\end{itemize}
+
+\textbf{Output}:
+
+\begin{itemize}
+\tightlist
+\item
+  Scalar \in F.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(str\) = \texttt{"pedersen\_vrf"}
+\item
+  \textbf{For} \(p\) \textbf{in} \(points\):
+  \(str = str \Vert PointToString(obj)\)
+\item
+  \(str = str \Vert ad \Vert 0x00\)
+\item
+  \(h = Sha512(str)\)
+\item
+  \(ht = h[0] .. h[31]\)
+\item
+  \(c = StringToInt(ht)\)
+\item
+  \textbf{return} \(c\)
+\end{enumerate}
+
+With \(PointToString\) and \(StringToInto\) defined as
+\texttt{point\_to\_string} and \texttt{string\_to\_int} in {[}RFC9381{]}
+with configuration specified in the \protect\hyperlink{ietf-vrf}{IETF
+VRF} section of this document.
 
 \end{document}

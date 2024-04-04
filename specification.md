@@ -1,17 +1,24 @@
-# Bandersnatch VRFs
+---
+title: Bandersnatch VRF-AD Specification
+author:
+  - Davide Galassi
+  - Seyed Hosseini
+---
+
+Draft 1 - 04-04-2024
 
 ## Introduction
 
 **Definition**: A *verifiable random function with additional data (VRF-AD)*
 can be described with four functions:
 
-- $VRF.KeyGen: () \mapsto (pk,sk)$ where $pk$ is a public key and $sk$ is
+- $KeyGen: () \mapsto (pk,sk)$ where $pk$ is a public key and $sk$ is
   its corresponding secret key.
-- $VRF.Sign : (sk,msg,ad) \mapsto \pi$ takes a secret key $sk$, an input $msg$,
+- $Sign : (sk,msg,ad) \mapsto \pi$ takes a secret key $sk$, an input $msg$,
   and additional data $ad$, and returns a VRF signature $\pi$.
-- $VRF.Eval : (sk, msg) \mapsto Out$ takes a secret key $sk$ and an input $msg$,
+- $Eval : (sk, msg) \mapsto Out$ takes a secret key $sk$ and an input $msg$,
   and returns a VRF output $out$.
-- $VRF.Verify: (pk,msg,aux,\pi) \mapsto (out|prep)$ for a public key $pk$,
+- $Verify: (pk,msg,aux,\pi) \mapsto (out|prep)$ for a public key $pk$,
   an input $msg$, and additional data $ad$, and then returns either an output
   $out$ or else failure $perp$.
 
@@ -24,11 +31,11 @@ All VRFs described in this specification are EC-VRF.
 
 For input $msg$ and $ad$ additional data first we compute the $VRFInput$
 which is a point on elliptic curve $E$ as follows:
-$$ t \leftarrow Transcript(msg) $$
-$$ VRFInput := H2C(challange(t, "vrf-input") $$
-
+$t \leftarrow Transcript(msg)$
+$VrfInput := H2C(challange(t, "vrf-input")$
 
 Where:
+
 - $transcript$ function is described in [[ark-transcript]] section.
 - $H2C: B \rightarrow G$ is a hash to curve function correspond
 to curve $E$ specified in Section [[hash-to-curve]] for the specific choice of $E$
@@ -49,7 +56,6 @@ $$ PreOutput \leftarrow sk \cdot VrfInput $$
 
 **Definition**: *VRF output* is generated using *VRF pre-output* point as:
 $$ VrfOutput \leftarrow Hash("vrfoutput", Encode(PreOutput)) $$
-
 
 
 ## IETF VRF
@@ -112,6 +118,7 @@ Configuration follows the RFC-9381 suite specification guidelines.
   The suite must be interpreted as defined by Section 8.5 of [RFC9380](https://datatracker.ietf.org/doc/rfc9380/)
   and using the domain separation tag `DST = "ECVRF_" || h2c_suite_ID_string || suite_string`.
 
+
 ## Pedersen VRF
 
 Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
@@ -151,7 +158,7 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
 5. $POrand \leftarrow krand \cdot input$
 6. $compk = sk \cdot K + sb \cdot B$
-7. $c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)$
+7. $c \rightarrow Challenge(compk, KBrand, POrand, ad)$
 8. $ks \rightarrow krand + c \cdot sk$
 9. $bs \rightarrow brand + c \cdot sb$
 10. **return** $(preout, compk, KBrand, PORand, ks, bs)$
@@ -172,7 +179,7 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 
 **Steps**:
 
-1. $c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)$
+1. $c \rightarrow Challenge(compk, KBrand, POrand, ad)$
 2. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
 3. $z1 \leftarrow ClearCofactor(z1)$
 4. **if** $z1 \neq O$ **then** **return** False
@@ -183,4 +190,31 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 
 NOTE: I don't think step 3 and 6 are necessary, we're working in the prime subgroup.
 
+### Challenge
+
+Defined similarly to the procedure specified by section 5.4.3 of
+[RFC9381](https://datatracker.ietf.org/doc/rfc9381/).
+
+**Inputs**:  
+
+- $points$: Sequence of points to include in the challenge.
+- $ad$: Additional data octet-string
+
+**Output**:  
+
+- Scalar \in F.  
+
+**Steps**:
+
+1. $str$ = `"pedersen_vrf"`
+2. **For** $p$ **in** $points$:
+    $str = str \Vert PointToString(obj)$
+3. $str = str \Vert ad \Vert 0x00$
+4. $h = Sha512(str)$
+5. $ht = h[0] .. h[31]$
+6. $c = StringToInt(ht)$
+7. **return** $c$
+
+With $PointToString$ and $StringToInto$ defined as `point_to_string` and `string_to_int`
+in [RFC9381] with configuration specified in the [IETF VRF] section of this document.
 
