@@ -203,7 +203,6 @@ In twisted Edwards coordinates.
 **Inputs**:
 
 - $sk$: Secret key $\in \F$.
-- $sb$: Blinding factor $\in \F$ (can be random)
 - $input$: $VRFInput \in \G$.
 - $ad$: Additional data octet-string
 
@@ -219,12 +218,13 @@ In twisted Edwards coordinates.
 3. $brand \leftarrow random()$
 4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
 5. $POrand \leftarrow krand \cdot input$
-6. $compk \leftarrow sk \cdot K + sb \cdot B$
-7. $c \leftarrow challenge(compk, KBrand, POrand, ad)$
-8. $ks \leftarrow krand + c \cdot sk$
-9. $bs \leftarrow brand + c \cdot sb$
-10. $proof \leftarrow (compk, KBrand, PORand, ks, bs)$
-11. **return** $(output, proof)$
+6. $sb \leftarrow random()$
+7. $compk \leftarrow sk \cdot K + sb \cdot B$
+8. $c \leftarrow challenge(compk, KBrand, POrand, ad)$
+9. $ks \leftarrow krand + c \cdot sk$
+10. $bs \leftarrow brand + c \cdot sb$
+11. $proof \leftarrow (compk, KBrand, PORand, ks, bs)$
+12. **return** $(output, proof)$
 
 **Externals**:
 
