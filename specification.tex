@@ -211,10 +211,7 @@ Configuration follows the RFC-9381 suite specification guidelines.
 
 Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in
-anonymized ring VRFs, or perhaps group VRFs.
-
-\hypertarget{pedersen-vrf-1}{%
-\subsection{Pedersen VRF}\label{pedersen-vrf-1}}
+anonymized ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the
 output has been generated with a secret key associated with a blinded
@@ -226,87 +223,114 @@ signer.
 \hypertarget{setup}{%
 \subsubsection{Setup}\label{setup}}
 
-PedersenVRF is initiated for prime subgroup \(G < E\) of an elliptic
-curve E with \(K, B \in G\) are defined to be \emph{key base} and
-\emph{blinding base} respectively.
+PedersenVRF is initiated for prime subgroup \(G\) of an elliptic curve E
+with \(K, B \in G\) defined to be \emph{key base} and \emph{blinding
+base} respectively.
 
-\hypertarget{pedersenvrf.sign}{%
-\subsubsection{PedersenVRF.Sign}\label{pedersenvrf.sign}}
+\hypertarget{sign}{%
+\subsubsection{Sign}\label{sign}}
 
-\textbf{Inputs}:\\
-- Transcript \(t\) of \texttt{ArkTranscript} type\\
-- \(input\): \(VRFInput \in G\). - \(sb\): Blinding coefficient
-\(\in F\)\\
-- \(sk\): A VRF secret key.\\
-- \(pk\): VRF verification key corresponds to \(sk\).\\
-\textbf{Output}:\\
-- A Quintuple \((compk, KBrand, PORand, ks, bs)2\) corresponding to
-PedersenVRF signature
+\textbf{Inputs}:
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\begin{itemize}
+\tightlist
+\item
+  \(sk\): VRF secret key.
+\item
+  \(sb\): Blinding factor \(\in F\)
+\item
+  \(Input\): \(VRFInput \in G\).
+\item
+  \(ad\): Additional data octet-string
+\end{itemize}
+
+\textbf{Output}:
+
+\begin{itemize}
+\tightlist
+\item
+  A quintuple \((preout, compk, KBrand, PORand, ks, bs)\) corresponding
+  to Pedersen VRF signature.
+\end{itemize}
+
+\textbf{Steps}:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(AddLabel(t, "PedersenVRF")\)
-\item
-  \(compk = sk*G + sb*B\)
-\item
-  AppendToTranscript(``KeyCommitment'')
-\item
-  AppendToTranscript(t, compk)
+  \(preout = sk \cdot input\)
 \item
   \(krand \leftarrow RandomElement(F)\)
 \item
   \(brand \leftarrow RandomElement(F)\)
 \item
-  \(KBrand \leftarrow krand * G + brand * B\)
+  \(KBrand \leftarrow krand \cdot G + brand \cdot B\)
 \item
-  \(POrand \leftarrow krand * input\)
+  \(POrand \leftarrow krand \cdot input\)
 \item
-  \(AppendToTranscript(t, "Pedersen R")\)
+  \(compk = sk \cdot K + sb \cdot B\)
 \item
-  \(AppendToTranscript(t, "PedersenVrfChallenge")\)
+  \(c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)\)
 \item
-  \(c \rightarrow GetChallengeFromTranscript(t)\)
+  \(ks \rightarrow krand + c \cdot sk\)
 \item
-  \(ks \rightarrow krand + sk * c\)
+  \(bs \rightarrow brand + c \cdot sb\)
 \item
-  \(bs \rightarrow brand + c * sb\)
-\item
-  \textbf{return} \((compk, KBrand, PORand, ks, bs)\)
+  \textbf{return} \((preout, compk, KBrand, PORand, ks, bs)\)
 \end{enumerate}
 
-\hypertarget{pedersenvrf.verify}{%
-\subsubsection{PedersenVRF.Verify}\label{pedersenvrf.verify}}
+\hypertarget{verify}{%
+\subsubsection{Verify}\label{verify}}
 
-\textbf{Inputs}:\\
-- \(t\): Transcript of \texttt{ArkTranscript} type\\
-- \(input\): \(VRFInput \in G\).\\
-- \(preout\): \(VRFPreOutput \in G\).\\
-- \((compk, KBrand, PORand, ks, bs)\) the quintuple results of
-PeredersonVRF.Sign\\
-\textbf{Output}:\\
-- True if Pedersen VRF signature verifys False otherwise.
+\textbf{Inputs}:
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\begin{itemize}
+\tightlist
+\item
+  \(pk\): VRF verification key corresponds to \(sk\).
+\item
+  \(input\): \(VRFInput\).
+\item
+  \(preout\): \(VRFPreOutput\).
+\item
+  \(ad\): Additional data octet-string
+\item
+  \((compk, KBrand, PORand, ks, bs)\) the output of Pedersen VRF Sign.
+\end{itemize}
 
-Append\((t, "PedersenVRF")\)\\
-Append\((t, ""KeyCommitment")\)\\
-Append\((t, compk)\)\\
-\(z1 \leftarrow POrand + c \times PreOut - In \times ks\)
-Append\((t, "Pedersen R")\)\\
-Append\((t, KBrand || PORand)\)\\
-\(c \leftarrow Challenge(t, "PedersenVrfChallenge")\)\\
-\(z1 \leftarrow POrand + c \times preoutput - input \times ks\)\\
-\(z1 \leftarrow ClearCofactor(z1)\)\\
-\textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False\\
-\(z2 \leftarrow KBrand + c \times compk - krand \times K - brand \times B\)\\
-\(z2 \leftarrow ClearCofactor(z1)\)\\
-\textbf{if} \(z2 \neq O\) \textbf{then} \textbf{return} False
-\textbf{else} \textbf{return} True
+\textbf{Output}:
 
-\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+\begin{itemize}
+\tightlist
+\item
+  True if Pedersen VRF is valid False otherwise.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)\)
+\item
+  \(z1 \leftarrow POrand + c \cdot preout - input \cdot ks\)
+\item
+  \(z1 \leftarrow ClearCofactor(z1)\)
+\item
+  \textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False
+\item
+  \(z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B\)
+\item
+  \(z2 \leftarrow ClearCofactor(z2)\)
+\item
+  \textbf{if} \(z2 \neq O\) \textbf{then} \textbf{return} False
+\item
+  \textbf{return} True
+\end{enumerate}
+
+NOTE: I don't think step 3 and 6 are necessary, we're working in the
+prime subgroup.
 
 \end{document}

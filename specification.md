@@ -114,78 +114,73 @@ Configuration follows the RFC-9381 suite specification guidelines.
 
 ## Pedersen VRF
 
-Pedersen VRF resembles EC VRF but replaces the
-public key by a Pedersen commitment to the secret key, which makes the
-Pedersen VRF useful in anonymized ring VRFs, or perhaps group VRFs.
-
-## Pedersen VRF
+Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
+commitment to the secret key, which makes the Pedersen VRF useful in
+anonymized ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves
 that the output has been generated with a secret key associated
 with a blinded public (instead of public key). The blinded public
 key is a cryptographic commitement to the public key. And it could
-unblinded to prove that the output of the VRF is corresponds to 
+unblinded to prove that the output of the VRF is corresponds to
 the public key of the signer.
 
 ### Setup
 
-PedersenVRF is initiated for prime subgroup $G < E$ of an elliptic
-curve E with $K, B \in G$ are defined to be *key base* and *blinding base*
-respectively.
+PedersenVRF is initiated for prime subgroup $G$ of an elliptic curve E
+with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 
-### PedersenVRF.Sign
+### Sign
+
+**Inputs**:
+
+- $sk$: VRF secret key.
+- $sb$: Blinding factor $\in F$
+- $Input$: $VRFInput \in G$.
+- $ad$: Additional data octet-string
+
+**Output**:
+
+- A quintuple $(preout, compk, KBrand, PORand, ks, bs)$ corresponding to Pedersen VRF signature.
+
+**Steps**:
+
+1. $preout = sk \cdot input$
+2. $krand \leftarrow RandomElement(F)$
+3. $brand \leftarrow RandomElement(F)$
+4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
+5. $POrand \leftarrow krand \cdot input$
+6. $compk = sk \cdot K + sb \cdot B$
+7. $c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)$
+8. $ks \rightarrow krand + c \cdot sk$
+9. $bs \rightarrow brand + c \cdot sb$
+10. **return** $(preout, compk, KBrand, PORand, ks, bs)$
+
+### Verify  
+
 **Inputs**:  
-  - Transcript $t$ of `ArkTranscript` type\
-  - $input$: $VRFInput \in G$.
-  - $sb$: Blinding coefficient $\in F$\
-  - $sk$: A VRF secret key.\
-  - $pk$: VRF verification key corresponds to $sk$.\
-**Output**:\
-  - A Quintuple
-      $(compk, KBrand, PORand, ks, bs)2$
-      corresponding to PedersenVRF signature
 
----
+- $pk$: VRF verification key corresponds to $sk$.
+- $input$: $VRFInput$.
+- $preout$: $VRFPreOutput$.
+- $ad$: Additional data octet-string
+- $(compk, KBrand, PORand, ks, bs)$ the output of Pedersen VRF Sign.
 
-1. $AddLabel(t, "PedersenVRF")$
-2. $compk = sk*G + sb*B$
-3. AppendToTranscript("KeyCommitment")
-4. AppendToTranscript(t, compk)
-5. $krand \leftarrow RandomElement(F)$
-6. $brand \leftarrow RandomElement(F)$
-7. $KBrand \leftarrow krand * G + brand * B$
-8. $POrand \leftarrow krand * input$
-9. $AppendToTranscript(t, "Pedersen R")$
-10. $AppendToTranscript(t, "PedersenVrfChallenge")$
-11. $c \rightarrow GetChallengeFromTranscript(t)$
-13. $ks \rightarrow krand + sk * c$ 
-12. $bs \rightarrow brand + c * sb$
-14. **return** $(compk, KBrand, PORand, ks, bs)$
-
-### PedersenVRF.Verify  
-**Inputs**:  
-  - $t$: Transcript of `ArkTranscript` type\
-  - $input$: $VRFInput \in G$.  
-  - $preout$: $VRFPreOutput \in G$.  
-  - $(compk, KBrand, PORand, ks, bs)$ the quintuple results of PeredersonVRF.Sign  
 **Output**:  
-  - True if Pedersen VRF signature verifys False otherwise.  
 
----
+- True if Pedersen VRF is valid False otherwise.  
 
-Append$(t, "PedersenVRF")$  
-Append$(t, ""KeyCommitment")$  
-Append$(t, compk)$  
-$z1 \leftarrow POrand + c \times PreOut - In \times ks$ 
-Append$(t, "Pedersen R")$  
-Append$(t, KBrand || PORand)$  
-$c \leftarrow Challenge(t, "PedersenVrfChallenge")$  
-$z1 \leftarrow POrand + c \times preoutput - input \times ks$   
-$z1 \leftarrow ClearCofactor(z1)$    
-**if** $z1 \neq O$ **then** **return** False  
-$z2 \leftarrow KBrand + c \times compk - krand \times K - brand \times B$  
-$z2 \leftarrow ClearCofactor(z1)$        
-**if** $z2 \neq O$ **then** **return** False **else** **return** True  
+**Steps**:
 
----          
+1. $c \rightarrow Challenge("pedersen", compk, KBrand, POrand, ad)$
+2. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
+3. $z1 \leftarrow ClearCofactor(z1)$
+4. **if** $z1 \neq O$ **then** **return** False
+5. $z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B$
+6. $z2 \leftarrow ClearCofactor(z2)$
+7. **if** $z2 \neq O$ **then** **return** False
+8. **return** True
+
+NOTE: I don't think step 3 and 6 are necessary, we're working in the prime subgroup.
+
 
