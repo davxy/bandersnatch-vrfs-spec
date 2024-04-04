@@ -143,7 +143,7 @@ str = str || ad || challenge_generation_domain_separator_back
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): secret key \(\in \mathbb{Z}^*_r\)
+  \(sk\): Secret key \(\in \mathbb{Z}^*_r\)
 \item
   \(input\): \(Input \in \langle G \rangle\)
 \item
@@ -167,11 +167,11 @@ str = str || ad || challenge_generation_domain_separator_back
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(preout = sk \cdot input\)
+  \(preout \leftarrow sk \cdot input\)
 \item
-  \(k \leftarrow Nonce(sk, input)\)
+  \(k \leftarrow nonce(sk, input)\)
 \item
-  \(c \leftarrow Challenge(Y, H, preout, k \cdot B, k \cdot input)\)
+  \(c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)\)
 \item
   \(s \leftarrow (k + c \cdot x)\)
 \item
@@ -185,11 +185,11 @@ str = str || ad || challenge_generation_domain_separator_back
 \begin{itemize}
 \tightlist
 \item
-  \(Nonce\): refer to
+  \(nonce\): refer to
   \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
   5.4.2
 \item
-  \(Challenge\): refer to
+  \(challenge\): refer to
   \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
   5.4.3
 \end{itemize}
@@ -202,7 +202,7 @@ str = str || ad || challenge_generation_domain_separator_back
 \begin{itemize}
 \tightlist
 \item
-  \(pk\): public key \(\in \langle G \rangle\)
+  \(pk\): Public key \(\in \langle G \rangle\)
 \item
   \(input\): \(Input \in \langle G \rangle\)
 \item
@@ -210,7 +210,7 @@ str = str || ad || challenge_generation_domain_separator_back
 \item
   \(output\): \(Output \in \langle G \rangle\)
 \item
-  \(proof\): as defined for \(Sign\) output.
+  \(proof\): As defined for \(Sign\) output.
 \end{itemize}
 
 \textbf{Outputs}:
@@ -227,11 +227,13 @@ str = str || ad || challenge_generation_domain_separator_back
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(U = s \cdot K - c \cdot pk\)
+  \((c, s) \leftarrow proof\)
 \item
-  \(V = s \cdot H - c \cdot preout\)
+  \(U \leftarrow s \cdot K - c \cdot pk\)
 \item
-  \(c' = Challenge(pk, input, output, U, V)\)
+  \(V \leftarrow s \cdot H - c \cdot preout\)
+\item
+  \(c' \leftarrow challenge(pk, input, output, U, V)\)
 \item
   \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
 \item
@@ -243,20 +245,22 @@ str = str || ad || challenge_generation_domain_separator_back
 \begin{itemize}
 \tightlist
 \item
-  \(Challenge\): as defined for \(Sign\)
+  \(challenge\): as defined for \(Sign\)
 \end{itemize}
 
 \hypertarget{bandersnatch-cipher-suite}{%
 \subsection{3.3. Bandersnatch Cipher
 Suite}\label{bandersnatch-cipher-suite}}
 
-Suite specification follows RFC9381 section 5.5 guidelines.
+Suite specification follows
+\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section 5.5
+guidelines and naming conventions.
 
 \begin{itemize}
 \item
-  The EC group \(\langle G \rangle\) is the Bandersnatch elliptic curve,
-  in Twisted Edwards form, with the finite field and curve parameters as
-  specified in the
+  The EC group \(\langle G \rangle\) is the prime subgroup of the
+  Bandersnatch elliptic curve, in Twisted Edwards form, with the finite
+  field and curve parameters as specified in the
   \href{https://neuromancer.sk/std/bls/Bandersnatch}{neuromancer}
   standard curves database. For this group, \texttt{fLen} =
   \texttt{qLen} = 32 and \texttt{cofactor} = 4.
@@ -271,10 +275,10 @@ Suite specification follows RFC9381 section 5.5 guidelines.
   \begin{itemize}
   \tightlist
   \item
-    \(G.x\) =
+    \(G.x\) :=
     \texttt{0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}
   \item
-    \(G.y\) =
+    \(G.y\) :=
     \texttt{0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}
   \end{itemize}
 \item
@@ -288,10 +292,10 @@ Suite specification follows RFC9381 section 5.5 guidelines.
   \texttt{cLen} = 32.
 \item
   \texttt{encode\_to\_curve\_salt} = \texttt{pk\_string}
-  (\(Encode(pk)\)).
+  (i.e.~\(Encode(pk)\)).
 \item
-  The \texttt{ECVRF\_nonce\_generation} function is as specified in
-  Section 5.4.2.1 of RFC-9381.
+  The \texttt{ECVRF\_nonce\_generation} function is specified in Section
+  5.4.2.1 of \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
 \item
   The \texttt{int\_to\_string} function encodes into the 32 bytes little
   endian representation.
@@ -299,20 +303,21 @@ Suite specification follows RFC9381 section 5.5 guidelines.
   The \texttt{string\_to\_int} function decodes from the 32 bytes little
   endian representation.
 \item
-  The point\_to\_string function converts a point on E to an octet
-  string using compressed form. The Y coordinate is encoded using
-  \texttt{int\_to\_string} function and the most significant bit of the
-  last octet is used to keep track of the X's sign. This implies that
-  the point is encoded on 32 bytes.
+  The point\_to\_string function converts a point in
+  \(\langle G \rangle\) to an octet string using compressed form. The
+  \(y\) coordinate is encoded using \texttt{int\_to\_string} function
+  and the most significant bit of the last octet is used to keep track
+  of the \(x\)'s sign. This implies that the point is encoded in 32
+  bytes.
 \item
   The string\_to\_point function tries to decompress the point encoded
   according to \texttt{point\_to\_string} procedure. This function MUST
   outputs ``INVALID'' if the octet string does not decode to a point on
-  the curve E.
+  the prime subgroup \(\langle G \rangle\).
 \item
   The hash function Hash is SHA-512 as specified in
-  \href{https://www.rfc-editor.org/rfc/rfc6234}{RFC6234}, with hLen =
-  64.
+  \href{https://www.rfc-editor.org/rfc/rfc6234}{RFC6234}, with
+  \texttt{hLen} = 64.
 \item
   The \texttt{ECVRF\_encode\_to\_curve} function (\emph{Elligator2}) is
   as specified in Section 5.4.1.2, with \texttt{h2c\_suite\_ID\_string}
@@ -326,39 +331,41 @@ Suite specification follows RFC9381 section 5.5 guidelines.
 \hypertarget{pedersen-vrf}{%
 \section{4. Pedersen VRF}\label{pedersen-vrf}}
 
-Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
-commitment to the secret key, which makes the Pedersen VRF useful in
-anonymized ring VRFs (See {[}Pedersen Ring VRF{]}).
+Pedersen VRF resembles IETF VRF but replaces the public key by a
+Pedersen commitment to the secret key, which makes the Pedersen VRF
+useful in anonymized ring VRFs (see {[}Pedersen Ring VRF{]}).
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the
 output has been generated with a secret key associated with a blinded
 public (instead of public key). The blinded public key is a
-cryptographic commitment to the public key. And it could unblinded to
-prove that the output of the VRF is corresponds to the public key of the
+cryptographic commitment to the public key. And it could be unblinded to
+prove that the output of the VRF corresponds to the public key of the
 signer.
 
 \hypertarget{setup}{%
 \subsection{4.1. Setup}\label{setup}}
 
-PedersenVRF is initiated for prime subgroup \(G\) of an elliptic curve E
-with \(K, B \in G\) defined to be \emph{key base} and \emph{blinding
-base} respectively.
+Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of an
+elliptic curve \(E\) with \(K, B \in \langle G \rangle\) defined to be
+the \emph{key base} and \emph{blinding base} respectively.
+
+In this specification we pick as much as possible from the
+{[}Bandersnatch Cipher Suite{]} specification.
 
 \begin{itemize}
 \tightlist
 \item
-  K is set equal to point \(g\) defined in {[}Bandersnatch Cipher
-  Suite{]}.
+  \(K\) is set equal to group generator \(G\) already defined.
 \item
-  B is defined as:
+  \(B\) is defined as:
 
   \begin{itemize}
   \tightlist
   \item
-    \(b.x\) =
+    \(B.x\) :=
     \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}
   \item
-    \(b.y\) =
+    \(B.y\) :=
     \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}
   \end{itemize}
 \end{itemize}
@@ -373,11 +380,11 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): VRF secret key \(\in F\).
+  \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
-  \(sb\): Blinding factor \(\in F\) (can be random)
+  \(sb\): Blinding factor \(\in \mathbb{Z}^*_r\) (can be random)
 \item
-  \(input\): \(VRFInput \in G\).
+  \(input\): \(VRFInput \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -387,8 +394,10 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  A quintuple \((preout, compk, KBrand, PORand, ks, bs)\) corresponding
-  to Pedersen VRF signature.
+  \(output\): \(Output \in \langle G \rangle\)
+\item
+  \(proof\): Pedersen proof
+  \(\in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
 \end{itemize}
 
 \textbf{Steps}:
@@ -397,26 +406,38 @@ In twisted Edwards coordinates.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(preout = sk \cdot input\)
+  \(output \leftarrow sk \cdot input\)
 \item
-  \(krand \leftarrow RandomElement(F)\)
+  \(krand \leftarrow random()\)
 \item
-  \(brand \leftarrow RandomElement(F)\)
+  \(brand \leftarrow random()\)
 \item
   \(KBrand \leftarrow krand \cdot G + brand \cdot B\)
 \item
   \(POrand \leftarrow krand \cdot input\)
 \item
-  \(compk = sk \cdot K + sb \cdot B\)
+  \(compk \leftarrow sk \cdot K + sb \cdot B\)
 \item
-  \(c \rightarrow Challenge(compk, KBrand, POrand, ad)\)
+  \(c \leftarrow challenge(compk, KBrand, POrand, ad)\)
 \item
-  \(ks \rightarrow krand + c \cdot sk\)
+  \(ks \leftarrow krand + c \cdot sk\)
 \item
-  \(bs \rightarrow brand + c \cdot sb\)
+  \(bs \leftarrow brand + c \cdot sb\)
 \item
-  \textbf{return} \((preout, compk, KBrand, PORand, ks, bs)\)
+  \(proof \leftarrow (compk, KBrand, PORand, ks, bs)\)
+\item
+  \textbf{return} \((output, proof)\)
 \end{enumerate}
+
+\textbf{Externals}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(challenge\): see {[}Challenge{]} section
+\item
+  \(random\): generates a random scalar in \(\mathbb{Z}^*_r\)
+\end{itemize}
 
 \hypertarget{verify-1}{%
 \subsection{4.3. Verify}\label{verify-1}}
@@ -426,15 +447,15 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  \(pk\): VRF verification key corresponds to \(sk\) \(\in G\).
+  \(pk\): Public key \(\in \langle G \rangle\).
 \item
-  \(input\): \(VRFInput \in G\).
+  \(input\): \(Input \in \langle G \rangle\).
 \item
-  \(preout\): \(VRFPreOutput \in G\).
+  \(output\): \(Output \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \((compk, KBrand, PORand, ks, bs)\) proof yielded by \(Sign\).
+  \(proof\): As defined for \(Sign\) output.
 \end{itemize}
 
 \textbf{Output}:
@@ -451,38 +472,41 @@ In twisted Edwards coordinates.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(c \rightarrow Challenge(compk, KBrand, POrand, ad)\)
+  \((compk, KBrand, PORand, ks, bs) \leftarrow proof\)
+\item
+  \(c \rightarrow challenge(compk, KBrand, POrand, ad)\)
 \item
   \(z1 \leftarrow POrand + c \cdot preout - input \cdot ks\)
-\item
-  \(z1 \leftarrow ClearCofactor(z1)\)
 \item
   \textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False
 \item
   \(z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B\)
-\item
-  \(z2 \leftarrow ClearCofactor(z2)\)
 \item
   \textbf{if} \(z2 \neq O\) \textbf{then} \textbf{return} False
 \item
   \textbf{return} True
 \end{enumerate}
 
-NOTE: I don't think step 3 and 6 are necessary, we're working in the
-prime subgroup.
+\textbf{Externals}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(challenge\): see {[}Challenge{]} section
+\end{itemize}
 
 \hypertarget{challenge}{%
 \subsection{4.4. Challenge}\label{challenge}}
 
-Defined similarly to the procedure specified by section 5.4.3 of
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
+Defined similarly to the challenge procedure specified by section 5.4.3
+of \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
 
 \textbf{Inputs}:
 
 \begin{itemize}
 \tightlist
 \item
-  \(points\): Sequence of points to include in the challenge.
+  \(points\): Sequence of points \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -492,7 +516,7 @@ Defined similarly to the procedure specified by section 5.4.3 of
 \begin{itemize}
 \tightlist
 \item
-  Scalar \in F.
+  Scalar \(\in \mathbb{Z}^*_r\).
 \end{itemize}
 
 \textbf{Steps}:
@@ -501,7 +525,7 @@ Defined similarly to the procedure specified by section 5.4.3 of
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(str\) = \texttt{"pedersen\_vrf"}
+  \(str\) = \texttt{"pedersen\_vrf"} (ASCII encoded octet-string)
 \item
   \textbf{for} \(p\) \textbf{in} \(points\):
   \(str = str \Vert PointToString(obj)\)
@@ -517,10 +541,9 @@ Defined similarly to the procedure specified by section 5.4.3 of
   \textbf{return} \(c\)
 \end{enumerate}
 
-With \(PointToString\) and \(StringToInto\) defined as
-\texttt{point\_to\_string} and \texttt{string\_to\_int} in
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} with
-configuration specified in the {[}IETF VRF{]} section of this document.
+With \(PointToString\) and \(StringToInt\) defined as
+\texttt{point\_to\_string} and \texttt{string\_to\_int} from
+\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} respectively.
 
 \hypertarget{pedersen-ring-vrf}{%
 \section{5. Pedersen Ring VRF}\label{pedersen-ring-vrf}}
@@ -542,7 +565,7 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): VRF secret key.
+  \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
   \(sb\): Blinding factor \(\in F\) (can be random)
 \item

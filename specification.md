@@ -69,7 +69,7 @@ In particular, *step 5* of RFC section 5.4.3 is defined as:
 
 **Inputs**:
 
-- $sk$: secret key $\in \F$
+- $sk$: Secret key $\in \F$
 - $input$: $Input \in \G$
 - $ad$: Additional data octet-string
 
@@ -80,27 +80,27 @@ In particular, *step 5* of RFC section 5.4.3 is defined as:
 
 **Steps**:
 
-1. $preout = sk \cdot input$
-2. $k \leftarrow Nonce(sk, input)$
-3. $c \leftarrow Challenge(Y, H, preout, k \cdot B, k \cdot input)$
+1. $preout \leftarrow sk \cdot input$
+2. $k \leftarrow nonce(sk, input)$
+3. $c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)$
 4. $s \leftarrow (k + c \cdot x)$
 5. $proof \leftarrow (c, s)$
 5. **return** $(preout, proof)$
 
 **Externals**:
 
-- $Nonce$: refer to [RFC9381] section 5.4.2
-- $Challenge$: refer to [RFC9381] section 5.4.3
+- $nonce$: refer to [RFC9381] section 5.4.2
+- $challenge$: refer to [RFC9381] section 5.4.3
 
 ## 3.2. Verify
 
 **Inputs**:  
 
-- $pk$: public key $\in \G$
+- $pk$: Public key $\in \G$
 - $input$: $Input \in \G$
 - $ad$: Additional data octet-string
 - $output$: $Output \in \G$
-- $proof$: as defined for $Sign$ output.
+- $proof$: As defined for $Sign$ output.
 
 **Outputs**:  
 
@@ -108,59 +108,60 @@ In particular, *step 5* of RFC section 5.4.3 is defined as:
 
 **Steps**:
 
-1. $U = s \cdot K - c \cdot pk$
-2. $V = s \cdot H - c \cdot preout$
-3. $c' = Challenge(pk, input, output, U, V)$
-4. **if** $c \neq c'$ **then** **return** False
-5. **return** True
+1. $(c, s) \leftarrow proof$
+2. $U \leftarrow s \cdot K - c \cdot pk$
+3. $V \leftarrow s \cdot H - c \cdot preout$
+4. $c' \leftarrow challenge(pk, input, output, U, V)$
+5. **if** $c \neq c'$ **then** **return** False
+6. **return** True
 
 **Externals**:
 
-- $Challenge$: as defined for $Sign$
+- $challenge$: as defined for $Sign$
 
 ## 3.3. Bandersnatch Cipher Suite
 
 Suite specification follows [RFC9381] section 5.5 guidelines and naming conventions.
 
-* The EC group $\G$ is the Bandersnatch elliptic curve, in Twisted Edwards form,
-  with the finite field and curve parameters as specified in the [neuromancer]
-  standard curves database. For this group, `fLen` = `qLen` = 32 and `cofactor` = 4.
+- The EC group $\G$ is the prime subgroup of the Bandersnatch elliptic curve,
+  in Twisted Edwards form, with the finite field and curve parameters as specified in
+  the [neuromancer] standard curves database. For this group, `fLen` = `qLen` = 32
+  and `cofactor` = 4.
 
-* The prime subgroup generator $G$ is constructed following *Zcash*'s guidelines:
+- The prime subgroup generator $G$ is constructed following *Zcash*'s guidelines:
   *"The generators of $G1$ and $G2$ are computed by finding the lexicographically
   smallest valid x-coordinate, and its lexicographically smallest y-coordinate
   and scaling it by the cofactor such that the result is not the point at infinity."*
 
-  - $G.x$ = `0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18`
-  - $G.y$ = `0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166`
+  - $G.x$ := `0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18`
+  - $G.y$ := `0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166`
 
-* The public key generation primitive is $pk = sk \cdot G$, with $sk$ the secret
+- The public key generation primitive is $pk = sk \cdot G$, with $sk$ the secret
   key scalar and $G$ the group generator. In this ciphersuite, the secret scalar
   `x` is equal to the secret key `sk`.
 
-* `suite_string` = 0x33.
+- `suite_string` = 0x33.
 
-* `cLen` = 32.
+- `cLen` = 32.
 
-* `encode_to_curve_salt` = `pk_string` (i.e. $Encode(pk)$).
+- `encode_to_curve_salt` = `pk_string` (i.e. $Encode(pk)$).
 
-* The `ECVRF_nonce_generation` function is specified in Section 5.4.2.1 of RFC-9381.
+- The `ECVRF_nonce_generation` function is specified in Section 5.4.2.1 of [RFC9381].
 
-* The `int_to_string` function encodes into the 32 bytes little endian representation.
+- The `int_to_string` function encodes into the 32 bytes little endian representation.
  
-* The `string_to_int` function decodes from the 32 bytes little endian representation.
+- The `string_to_int` function decodes from the 32 bytes little endian representation.
 
-* The point_to_string function converts a point on E to an octet
-  string using compressed form. The Y coordinate is encoded using
-  `int_to_string` function and the most significant bit of the last
-  octet is used to keep track of the X's sign. This implies that
-  the point is encoded on 32 bytes.
+- The point_to_string function converts a point in $\G$ to an octet string using
+  compressed form. The $y$ coordinate is encoded using `int_to_string` function
+  and the most significant bit of the last octet is used to keep track of the
+  $x$'s sign. This implies that the point is encoded in 32 bytes.
 
-* The string_to_point function tries to decompress the point encoded
-  according to `point_to_string` procedure. This function MUST outputs
-  "INVALID" if the octet string does not decode to a point on the curve E.
+- The string_to_point function tries to decompress the point encoded according
+  to `point_to_string` procedure. This function MUST outputs "INVALID" if the
+  octet string does not decode to a point on the prime subgroup $\G$.
 
-* The hash function Hash is SHA-512 as specified in
+- The hash function Hash is SHA-512 as specified in
   [RFC6234](https://www.rfc-editor.org/rfc/rfc6234), with `hLen` = 64.
 
 * The `ECVRF_encode_to_curve` function (*Elligator2*) is as specified in
@@ -173,23 +174,26 @@ Suite specification follows [RFC9381] section 5.5 guidelines and naming conventi
 
 Pedersen VRF resembles IETF VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in anonymized
-ring VRFs (See [Pedersen Ring VRF]).
+ring VRFs (see [Pedersen Ring VRF]).
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the output
 has been generated with a secret key associated with a blinded public (instead
 of public key). The blinded public key is a cryptographic commitment to the
-public key. And it could unblinded to prove that the output of the VRF is
+public key. And it could be unblinded to prove that the output of the VRF
 corresponds to the public key of the signer.
 
 ## 4.1. Setup
 
-PedersenVRF is initiated for prime subgroup $G$ of an elliptic curve E
-with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
+Pedersen VRF is initiated for prime subgroup $\G$ of an elliptic curve $E$
+with $K, B \in \G$ defined to be the *key base* and *blinding base* respectively.
 
-- K is set equal to point $g$ defined in [Bandersnatch Cipher Suite].
-- B is defined as:
-  - $b.x$ = `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
-  - $b.y$ = `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
+In this specification we pick as much as possible from the [Bandersnatch Cipher Suite]
+specification.
+
+- $K$ is set equal to group generator $G$ already defined.
+- $B$ is defined as:
+  - $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
+  - $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
 
 In twisted Edwards coordinates.
 
@@ -197,37 +201,44 @@ In twisted Edwards coordinates.
 
 **Inputs**:
 
-- $sk$: VRF secret key $\in F$.
-- $sb$: Blinding factor $\in F$ (can be random)
-- $input$: $VRFInput \in G$.
+- $sk$: Secret key $\in \F$.
+- $sb$: Blinding factor $\in \F$ (can be random)
+- $input$: $VRFInput \in \G$.
 - $ad$: Additional data octet-string
 
 **Output**:
 
-- A quintuple $(preout, compk, KBrand, PORand, ks, bs)$ corresponding to Pedersen VRF signature.
+- $output$: $Output \in \G$
+- $proof$: Pedersen proof $\in (\G, \G, \G, \F, \F)$
 
 **Steps**:
 
-1. $preout = sk \cdot input$
-2. $krand \leftarrow RandomElement(F)$
-3. $brand \leftarrow RandomElement(F)$
+1. $output \leftarrow sk \cdot input$
+2. $krand \leftarrow random()$
+3. $brand \leftarrow random()$
 4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
 5. $POrand \leftarrow krand \cdot input$
-6. $compk = sk \cdot K + sb \cdot B$
-7. $c \rightarrow Challenge(compk, KBrand, POrand, ad)$
-8. $ks \rightarrow krand + c \cdot sk$
-9. $bs \rightarrow brand + c \cdot sb$
-10. **return** $(preout, compk, KBrand, PORand, ks, bs)$
+6. $compk \leftarrow sk \cdot K + sb \cdot B$
+7. $c \leftarrow challenge(compk, KBrand, POrand, ad)$
+8. $ks \leftarrow krand + c \cdot sk$
+9. $bs \leftarrow brand + c \cdot sb$
+10. $proof \leftarrow (compk, KBrand, PORand, ks, bs)$
+11. **return** $(output, proof)$
+
+**Externals**:
+
+- $challenge$: see [Challenge] section
+- $random$: generates a random scalar in $\F$
 
 ## 4.3. Verify  
 
 **Inputs**:  
 
-- $pk$: VRF verification key corresponds to $sk$ $\in G$.
-- $input$: $VRFInput \in G$.
-- $preout$: $VRFPreOutput \in G$.
+- $pk$: Public key $\in \G$.
+- $input$: $Input \in \G$.
+- $output$: $Output \in \G$.
 - $ad$: Additional data octet-string
-- $(compk, KBrand, PORand, ks, bs)$ proof yielded by $Sign$.
+- $proof$: As defined for $Sign$ output.
 
 **Output**:  
 
@@ -235,33 +246,34 @@ In twisted Edwards coordinates.
 
 **Steps**:
 
-1. $c \rightarrow Challenge(compk, KBrand, POrand, ad)$
-2. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
-3. $z1 \leftarrow ClearCofactor(z1)$
+1. $(compk, KBrand, PORand, ks, bs) \leftarrow proof$
+2. $c \rightarrow challenge(compk, KBrand, POrand, ad)$
+3. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
 4. **if** $z1 \neq O$ **then** **return** False
 5. $z2 \leftarrow KBrand + c \cdot compk - krand \cdot K - brand \cdot B$
-6. $z2 \leftarrow ClearCofactor(z2)$
-7. **if** $z2 \neq O$ **then** **return** False
-8. **return** True
+6. **if** $z2 \neq O$ **then** **return** False
+7. **return** True
 
-NOTE: I don't think step 3 and 6 are necessary, we're working in the prime subgroup.
+**Externals**:
+
+- $challenge$: see [Challenge] section
 
 ## 4.4. Challenge
 
-Defined similarly to the procedure specified by section 5.4.3 of [RFC9381].
+Defined similarly to the challenge procedure specified by section 5.4.3 of [RFC9381].
 
 **Inputs**:  
 
-- $points$: Sequence of points to include in the challenge.
+- $points$: Sequence of points $\in \G$.
 - $ad$: Additional data octet-string
 
 **Output**:  
 
-- Scalar \in F.  
+- Scalar $\in \F$.  
 
 **Steps**:
 
-1. $str$ = `"pedersen_vrf"`
+1. $str$ = `"pedersen_vrf"` (ASCII encoded octet-string)
 2. **for** $p$ **in** $points$: $str = str \Vert PointToString(obj)$
 3. $str = str \Vert ad \Vert 0x00$
 4. $h = Sha512(str)$
@@ -269,8 +281,8 @@ Defined similarly to the procedure specified by section 5.4.3 of [RFC9381].
 6. $c = StringToInt(ht)$
 7. **return** $c$
 
-With $PointToString$ and $StringToInto$ defined as `point_to_string` and `string_to_int`
-in [RFC9381] with configuration specified in the [IETF VRF] section of this document.
+With $PointToString$ and $StringToInt$ defined as `point_to_string` and `string_to_int`
+from [RFC9381] respectively.
 
 
 # 5. Pedersen Ring VRF
@@ -289,31 +301,33 @@ TODO:
 
 **Inputs**:
 
-- $sk$: VRF secret key.
-- $sb$: Blinding factor $\in F$ (can be random)
-- $input$: $VRFInput \in G$.
+- $sk$: Secret key $\in \F$.
+- $sb$: Blinding factor $\in \F$ (can be random)
+- $input$: $Input \in \G$.
 - $ad$: Additional data octet-string
-- $P$: ring prover key
+- $P$: Ring prover key
 
 **Output**:
 
-- $(preout, pedersen-proof, zk-proof)$
+- $output$: $Output \in \G$.
+- $pproof$: Pedersen proof as specified in Pedersen VRF spec.
+- $zproof$: Ring proof (TODO)
 
 **Steps**:
 
-1. $(preout, pedersen-proof) \leftarrow PedersenSign(sk, sb, input, ad)$
-2. ring-proof: TODO
+1. $(output, pproof) \leftarrow PedersenSign(sk, sb, input, ad)$
+2. $zproof \leftarrow RingProve(...)$ (TODO)
 
 ## 5.3. Verify
 
 **Inputs**:  
 
-- $pk$: VRF verification key corresponds to $sk$ $\in G$.
-- $input$: $VRFInput \in G$.
-- $preout$: $VRFPreOutput \in G$.
+- $input$: $Input \in \G$.
+- $output$: $Output \in \G$.
 - $ad$: Additional data octet-string
-- $P$: ring prover key
-- $(pproof, rproof)$ proofs yielded by $Sign$.
+- $V$: ring verifier key $\in ?$
+- $pproof$: Pedersen proof as defined in Pedersen VRF spec
+- $zproof$: Ring proof $\in ?$
 
 **Output**:  
 
@@ -321,8 +335,11 @@ TODO:
 
 **Steps**:
 
-- PedersenVerify(pk, input, preout, ad, pedersen-proof)
-- verify ring-proof
+- 1. $res = PedersenVerify(pk, input, preout, ad, pproof)$
+- 2. **if** $res \neq True$ **return** False
+- 3. $res = RingVerify(...)$ (TODO)
+- 4. **if** $res \neq True$ **return** False
+- 4. **return** True
 
 
 # 6. References
