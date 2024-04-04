@@ -382,8 +382,6 @@ In twisted Edwards coordinates.
 \item
   \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
-  \(sb\): Blinding factor \(\in \mathbb{Z}^*_r\) (can be random)
-\item
   \(input\): \(VRFInput \in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
@@ -416,6 +414,8 @@ In twisted Edwards coordinates.
 \item
   \(POrand \leftarrow krand \cdot input\)
 \item
+  \(sb \leftarrow random()\)
+\item
   \(compk \leftarrow sk \cdot K + sb \cdot B\)
 \item
   \(c \leftarrow challenge(compk, KBrand, POrand, ad)\)
@@ -446,8 +446,6 @@ In twisted Edwards coordinates.
 
 \begin{itemize}
 \tightlist
-\item
-  \(pk\): Public key \(\in \langle G \rangle\).
 \item
   \(input\): \(Input \in \langle G \rangle\).
 \item

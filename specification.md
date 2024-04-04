@@ -235,7 +235,6 @@ In twisted Edwards coordinates.
 
 **Inputs**:  
 
-- $pk$: Public key $\in \G$.
 - $input$: $Input \in \G$.
 - $output$: $Output \in \G$.
 - $ad$: Additional data octet-string
