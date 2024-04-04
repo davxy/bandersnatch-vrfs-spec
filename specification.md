@@ -176,7 +176,12 @@ the public key of the signer.
 ### 4.1. Setup
 
 PedersenVRF is initiated for prime subgroup $G$ of an elliptic curve E
-with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
+with $K, B \in G$ defined to be *key base* and *blinding base* respectively. K is set equal to point $g$ defined in [Bandersnatch Cipher Suite]. B is defined as:
+
+  - $b.x$ = `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
+  - $b.y$ = `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
+
+In twisted Edwards coordinates.
 
 ### 4.2. Sign
 
