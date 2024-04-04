@@ -250,7 +250,7 @@ In twisted Edwards coordinates.
 2. $c \rightarrow challenge(compk, KBrand, POrand, ad)$
 3. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
 4. **if** $z1 \neq O$ **then** **return** False
-5. $z2 \leftarrow KBrand + c \cdot compk - krand \cdot G - brand \cdot B$
+5. $z2 \leftarrow KBrand + c \cdot compk - ks \cdot G - bs \cdot B$
 6. **if** $z2 \neq O$ **then** **return** False
 7. **return** True
 
