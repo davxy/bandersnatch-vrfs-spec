@@ -7,7 +7,7 @@ author:
 
 Draft 1 - 04-04-2024
 
-## Introduction
+## 1. Introduction
 
 **Definition**: A *verifiable random function with additional data (VRF-AD)*
 can be described with two functions:
@@ -25,14 +25,16 @@ scheme.
 
 All VRFs described in this specification are EC-VRF.
 
-### VRF Input
+## 2. Relevant Types
+
+### 2.1. VRF Input
 
 A point on $E$ and generated using $msg$ octet-string via the *Elligator 2*
 hash-to-curve algorithm described by section 6.8.2 of [RFC9380].
 
 The algorithm yields a point which is inside the prime order subgroup of $E$.
 
-### VRF Pre-Output
+### 2.2. VRF Pre-Output
 
 A point generated using VRF input point as:
 
@@ -41,7 +43,7 @@ $$PreOutput \leftarrow sk \cdot Input$$
 This is typically part of the VRF signature $\pi$ and is defined as $out$ in the
 $Verify$ function above.
 
-### VRF Output
+### 2.1. VRF Output
 
 Generated using *VRF pre-output* point as:
 
@@ -51,7 +53,7 @@ With $context$ an application specific context string and $PointToString$ define
 `point_to_string` in [RFC-9381].
 
 
-## IETF VRF
+## 3. IETF VRF
 
 Definition of a VRF based on the IETF [RFC9381].
 
@@ -62,7 +64,36 @@ In particular the step 5 of section 5.4.3 is defined as:
 
     str = str || ad || challenge_generation_domain_separator_back
 
-### Bandersnatch Cipher Suite
+### 3.1. Setup
+
+IETF VRF is initiated for prime subgroup $G$ of an elliptic curve E
+with $K \in G$ defined to be *key base* respectively.
+
+### 3.2. Sign
+
+**Inputs**:
+
+- $sk$: VRF secret key.
+- $Input$: $VRFInput \in G$.
+- $ad$: Additional data octet-string
+
+**Output**:
+
+- A triple $(preout, c, s)$ corresponding to IETF VRF signature.
+
+**Steps**:
+
+1. $preout = sk \cdot input$
+2. $k \rightarrow Nonce(sk, input)$ (see [RFC9381] section 5.4.2)
+3. $c \rightarrow Challenge(Y, H, Gamma, k*B, k*H)$ (see [RFC9381] section 5.4.3)
+4. $s \rightarrow (k + c \cdot x)$
+5. **return** $(preout, c, s)$
+
+### 3.3. Verify
+
+TODO
+
+### 3.4. Bandersnatch Cipher Suite
 
 Suite specification follows RFC9381 section 5.5 guidelines.
 
@@ -113,7 +144,7 @@ Suite specification follows RFC9381 section 5.5 guidelines.
   and using the domain separation tag `DST = "ECVRF_" || h2c_suite_ID_string || suite_string`.
 
 
-## Pedersen VRF
+## 4. Pedersen VRF
 
 Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in
@@ -126,12 +157,12 @@ key is a cryptographic commitment to the public key. And it could
 unblinded to prove that the output of the VRF is corresponds to
 the public key of the signer.
 
-### Setup
+### 4.1. Setup
 
 PedersenVRF is initiated for prime subgroup $G$ of an elliptic curve E
 with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 
-### Sign
+### 4.2. Sign
 
 **Inputs**:
 
@@ -157,7 +188,7 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 9. $bs \rightarrow brand + c \cdot sb$
 10. **return** $(preout, compk, KBrand, PORand, ks, bs)$
 
-### Verify  
+### 4.3. Verify  
 
 **Inputs**:  
 
@@ -184,7 +215,7 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 
 NOTE: I don't think step 3 and 6 are necessary, we're working in the prime subgroup.
 
-### Challenge
+### 4.4. Challenge
 
 Defined similarly to the procedure specified by section 5.4.3 of [RFC9381].
 
@@ -215,3 +246,8 @@ in [RFC9381] with configuration specified in the [IETF VRF] section of this docu
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380/
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381/
 [neuromancer]: https://neuromancer.sk/std/bls/Bandersnatch
+
+
+## 5.5. References
+
+TODO

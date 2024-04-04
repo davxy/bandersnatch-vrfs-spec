@@ -59,7 +59,7 @@
 Draft 1 - 04-04-2024
 
 \hypertarget{introduction}{%
-\subsection{Introduction}\label{introduction}}
+\subsection{1. Introduction}\label{introduction}}
 
 \textbf{Definition}: A \emph{verifiable random function with additional
 data (VRF-AD)} can be described with two functions:
@@ -82,8 +82,11 @@ an elliptic curve signature scheme.
 
 All VRFs described in this specification are EC-VRF.
 
+\hypertarget{relevant-types}{%
+\subsection{2. Relevant Types}\label{relevant-types}}
+
 \hypertarget{vrf-input}{%
-\subsubsection{VRF Input}\label{vrf-input}}
+\subsubsection{2.1. VRF Input}\label{vrf-input}}
 
 A point on \(E\) and generated using \(msg\) octet-string via the
 \emph{Elligator 2} hash-to-curve algorithm described by section 6.8.2 of
@@ -93,7 +96,7 @@ The algorithm yields a point which is inside the prime order subgroup of
 \(E\).
 
 \hypertarget{vrf-pre-output}{%
-\subsubsection{VRF Pre-Output}\label{vrf-pre-output}}
+\subsubsection{2.2. VRF Pre-Output}\label{vrf-pre-output}}
 
 A point generated using VRF input point as:
 
@@ -103,7 +106,7 @@ This is typically part of the VRF signature \(\pi\) and is defined as
 \(out\) in the \(Verify\) function above.
 
 \hypertarget{vrf-output}{%
-\subsubsection{VRF Output}\label{vrf-output}}
+\subsubsection{2.1. VRF Output}\label{vrf-output}}
 
 Generated using \emph{VRF pre-output} point as:
 
@@ -114,7 +117,7 @@ With \(context\) an application specific context string and
 {[}RFC-9381{]}.
 
 \hypertarget{ietf-vrf}{%
-\subsection{IETF VRF}\label{ietf-vrf}}
+\subsection{3. IETF VRF}\label{ietf-vrf}}
 
 Definition of a VRF based on the IETF
 \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
@@ -129,8 +132,63 @@ In particular the step 5 of section 5.4.3 is defined as:
 str = str || ad || challenge_generation_domain_separator_back
 \end{verbatim}
 
+\hypertarget{setup}{%
+\subsubsection{3.1. Setup}\label{setup}}
+
+IETF VRF is initiated for prime subgroup \(G\) of an elliptic curve E
+with \(K \in G\) defined to be \emph{key base} respectively.
+
+\hypertarget{sign}{%
+\subsubsection{3.2. Sign}\label{sign}}
+
+\textbf{Inputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(sk\): VRF secret key.
+\item
+  \(Input\): \(VRFInput \in G\).
+\item
+  \(ad\): Additional data octet-string
+\end{itemize}
+
+\textbf{Output}:
+
+\begin{itemize}
+\tightlist
+\item
+  A triple \((preout, c, s)\) corresponding to IETF VRF signature.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(preout = sk \cdot input\)
+\item
+  \(k \rightarrow Nonce(sk, input)\) (see
+  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
+  5.4.2)
+\item
+  \(c \rightarrow Challenge(Y, H, Gamma, k*B, k*H)\) (see
+  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
+  5.4.3)
+\item
+  \(s \rightarrow (k + c \cdot x)\)
+\item
+  \textbf{return} \((preout, c, s)\)
+\end{enumerate}
+
+\hypertarget{verify}{%
+\subsubsection{3.3. Verify}\label{verify}}
+
+TODO
+
 \hypertarget{bandersnatch-cipher-suite}{%
-\subsubsection{Bandersnatch Cipher
+\subsubsection{3.4. Bandersnatch Cipher
 Suite}\label{bandersnatch-cipher-suite}}
 
 Suite specification follows RFC9381 section 5.5 guidelines.
@@ -204,7 +262,7 @@ Suite specification follows RFC9381 section 5.5 guidelines.
 \end{itemize}
 
 \hypertarget{pedersen-vrf}{%
-\subsection{Pedersen VRF}\label{pedersen-vrf}}
+\subsection{4. Pedersen VRF}\label{pedersen-vrf}}
 
 Pedersen VRF resembles EC VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in
@@ -217,15 +275,15 @@ cryptographic commitment to the public key. And it could unblinded to
 prove that the output of the VRF is corresponds to the public key of the
 signer.
 
-\hypertarget{setup}{%
-\subsubsection{Setup}\label{setup}}
+\hypertarget{setup-1}{%
+\subsubsection{4.1. Setup}\label{setup-1}}
 
 PedersenVRF is initiated for prime subgroup \(G\) of an elliptic curve E
 with \(K, B \in G\) defined to be \emph{key base} and \emph{blinding
 base} respectively.
 
-\hypertarget{sign}{%
-\subsubsection{Sign}\label{sign}}
+\hypertarget{sign-1}{%
+\subsubsection{4.2. Sign}\label{sign-1}}
 
 \textbf{Inputs}:
 
@@ -277,8 +335,8 @@ base} respectively.
   \textbf{return} \((preout, compk, KBrand, PORand, ks, bs)\)
 \end{enumerate}
 
-\hypertarget{verify}{%
-\subsubsection{Verify}\label{verify}}
+\hypertarget{verify-1}{%
+\subsubsection{4.3. Verify}\label{verify-1}}
 
 \textbf{Inputs}:
 
@@ -331,7 +389,7 @@ NOTE: I don't think step 3 and 6 are necessary, we're working in the
 prime subgroup.
 
 \hypertarget{challenge}{%
-\subsubsection{Challenge}\label{challenge}}
+\subsubsection{4.4. Challenge}\label{challenge}}
 
 Defined similarly to the procedure specified by section 5.4.3 of
 \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
@@ -379,7 +437,11 @@ Defined similarly to the procedure specified by section 5.4.3 of
 With \(PointToString\) and \(StringToInto\) defined as
 \texttt{point\_to\_string} and \texttt{string\_to\_int} in
 \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} with
-configuration specified in the \protect\hyperlink{ietf-vrf}{IETF VRF}
-section of this document.
+configuration specified in the {[}IETF VRF{]} section of this document.
+
+\hypertarget{references}{%
+\subsection{5.5. References}\label{references}}
+
+TODO
 
 \end{document}
