@@ -82,8 +82,8 @@ an elliptic curve signature scheme.
 
 All VRFs described in this specification are EC-VRF.
 
-\hypertarget{relevant-types}{%
-\subsection{2. Relevant Types}\label{relevant-types}}
+\hypertarget{preliminaries}{%
+\subsection{2. Preliminaries}\label{preliminaries}}
 
 \hypertarget{vrf-input}{%
 \subsubsection{2.1. VRF Input}\label{vrf-input}}
@@ -108,13 +108,12 @@ This is typically part of the VRF signature \(\pi\) and is defined as
 \hypertarget{vrf-output}{%
 \subsubsection{2.1. VRF Output}\label{vrf-output}}
 
-Generated using \emph{VRF pre-output} point as:
+An octet-string generated using \emph{VRF pre-output} point as defined
+by the proof-to-hash procedure in section 5.2 in
+\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
 
-\[VrfOutput \leftarrow Hash(context, PointToString(PreOutput))\]
-
-With \(context\) an application specific context string and
-\(PointToString\) defined as \texttt{point\_to\_string} in
-{[}RFC-9381{]}.
+The size of the output is determined by the hasher used by the
+procedure, see {[}Bandersnatch Cipher Suite{]} for details.
 
 \hypertarget{ietf-vrf}{%
 \subsection{3. IETF VRF}\label{ietf-vrf}}
@@ -185,7 +184,48 @@ with \(K \in G\) defined to be \emph{key base} respectively.
 \hypertarget{verify}{%
 \subsubsection{3.3. Verify}\label{verify}}
 
-TODO
+\textbf{Inputs}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(pk\): VRF verification key corresponds to \(sk\).
+\item
+  \(input\): \(VRFInput\).
+\item
+  \(preout\): \(VRFPreOutput\).
+\item
+  \(ad\): Additional data octet-string
+\item
+  \((c, s)\) proof yielded by \(Sign\).
+\end{itemize}
+
+\textbf{Output}:
+
+\begin{itemize}
+\tightlist
+\item
+  True if proof is valid, False otherwise.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(U = s \cdot K - c \cdot pk\)
+\item
+  \(V = s \cdot H - c \cdot preout\)
+\item
+  \(c' = Challenge(pk, input, preout, U, V)\) (see
+  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} Section
+  5.4.3)
+\item
+  \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
+\item
+  \textbf{return} True
+\end{enumerate}
 
 \hypertarget{bandersnatch-cipher-suite}{%
 \subsubsection{3.4. Bandersnatch Cipher
@@ -351,7 +391,7 @@ base} respectively.
 \item
   \(ad\): Additional data octet-string
 \item
-  \((compk, KBrand, PORand, ks, bs)\) the output of Pedersen VRF Sign.
+  \((compk, KBrand, PORand, ks, bs)\) proof yielded by \(Sign\).
 \end{itemize}
 
 \textbf{Output}:
@@ -359,7 +399,7 @@ base} respectively.
 \begin{itemize}
 \tightlist
 \item
-  True if Pedersen VRF is valid False otherwise.
+  True if proof is valid, False otherwise.
 \end{itemize}
 
 \textbf{Steps}:

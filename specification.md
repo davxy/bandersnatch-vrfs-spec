@@ -25,7 +25,7 @@ scheme.
 
 All VRFs described in this specification are EC-VRF.
 
-## 2. Relevant Types
+## 2. Preliminaries
 
 ### 2.1. VRF Input
 
@@ -45,13 +45,11 @@ $Verify$ function above.
 
 ### 2.1. VRF Output
 
-Generated using *VRF pre-output* point as:
+An octet-string generated using *VRF pre-output* point as defined by the
+proof-to-hash procedure in section 5.2 in [RFC9381].
 
-$$VrfOutput \leftarrow Hash(context, PointToString(PreOutput))$$
-
-With $context$ an application specific context string and $PointToString$ defined as
-`point_to_string` in [RFC-9381].
-
+The size of the output is determined by the hasher used by the procedure,
+see [Bandersnatch Cipher Suite] for details.
 
 ## 3. IETF VRF
 
@@ -91,7 +89,25 @@ with $K \in G$ defined to be *key base* respectively.
 
 ### 3.3. Verify
 
-TODO
+**Inputs**:  
+
+- $pk$: VRF verification key corresponds to $sk$.
+- $input$: $VRFInput$.
+- $preout$: $VRFPreOutput$.
+- $ad$: Additional data octet-string
+- $(c, s)$ proof yielded by $Sign$.
+
+**Output**:  
+
+- True if proof is valid, False otherwise.  
+
+**Steps**:
+
+1. $U = s \cdot K - c \cdot pk$
+2. $V = s \cdot H - c \cdot preout$
+3. $c' = Challenge(pk, input, preout, U, V)$ (see [RFC9381] Section 5.4.3)
+4. **if** $c \neq c'$ **then** **return** False
+5. **return** True
 
 ### 3.4. Bandersnatch Cipher Suite
 
@@ -196,11 +212,11 @@ with $K, B \in G$ defined to be *key base* and *blinding base* respectively.
 - $input$: $VRFInput$.
 - $preout$: $VRFPreOutput$.
 - $ad$: Additional data octet-string
-- $(compk, KBrand, PORand, ks, bs)$ the output of Pedersen VRF Sign.
+- $(compk, KBrand, PORand, ks, bs)$ proof yielded by $Sign$.
 
 **Output**:  
 
-- True if Pedersen VRF is valid False otherwise.  
+- True if proof is valid, False otherwise.  
 
 **Steps**:
 
