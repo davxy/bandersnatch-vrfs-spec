@@ -412,6 +412,8 @@ specification for IETF VRF.
 \item
   \(x\): Secret key \(\in \mathbb{Z}^*_r\)
 \item
+  \(b\): Secret blinding factor \(\in \mathbb{Z}^*_r\)
+\item
   \(I\): VRF Input \(\in \langle G \rangle\)
 \item
   \(ad\): Additional data octet-string
@@ -436,7 +438,7 @@ specification for IETF VRF.
 \item
   \(O \leftarrow x \cdot I\)
 \item
-  \((b, k, k_b) \leftarrow random()\)
+  \((k, k_b) \leftarrow random()\)
 \item
   \(Y_c \leftarrow x \cdot G + b \cdot B\)
 \item

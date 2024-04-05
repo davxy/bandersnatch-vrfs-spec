@@ -215,6 +215,7 @@ much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF
 **Inputs**:
 
 - $x$: Secret key $\in \F$
+- $b$: Secret blinding factor $\in \F$
 - $I$: VRF Input $\in \G$
 - $ad$: Additional data octet-string
 
@@ -226,7 +227,7 @@ much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF
 **Steps**:
 
 1. $O \leftarrow x \cdot I$
-2. $(b, k, k_b) \leftarrow random()$
+2. $(k, k_b) \leftarrow random()$
 3. $Y_c \leftarrow x \cdot G + b \cdot B$
 4. $KB_r \leftarrow k \cdot G + k_b \cdot B$
 5. $O_k \leftarrow k \cdot I$
