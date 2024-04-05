@@ -147,7 +147,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 1. $output \leftarrow sk \cdot input$
 2. $k \leftarrow nonce(sk, input)$
 3. $c \leftarrow challenge(pk, input, output, k \cdot G, k \cdot input)$
-4. $s \leftarrow (k + c \cdot x)$
+4. $s \leftarrow (k + c \cdot sk)$
 5. $proof \leftarrow (c, s)$
 5. **return** $(output, proof)$
 
