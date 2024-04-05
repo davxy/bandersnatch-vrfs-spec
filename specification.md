@@ -133,23 +133,24 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 **Inputs**:
 
-- $sk$: Secret key $\in \F$
-- $input$: $Input \in \G$
+- $x$: Secret key $\in \F$
+- $I$: VRF Input $\in \G$
 - $ad$: Additional data octet-string
 
 **Outputs**:
 
-- $output$: $Output \in \G$
-- $proof$: A *Schnorr-like* proof $\in (\F, \F)$
+- $O$: VRF Output $\in \G$
+- $\pi$: *Schnorr-like* proof $\in (\F, \F)$
 
 **Steps**:
 
-1. $output \leftarrow sk \cdot input$
-2. $k \leftarrow nonce(sk, input)$
-3. $c \leftarrow challenge(pk, input, output, k \cdot G, k \cdot input)$
-4. $s \leftarrow (k + c \cdot sk)$
-5. $proof \leftarrow (c, s)$
-5. **return** $(output, proof)$
+1. $O \leftarrow x \cdot I$
+2. $Y \leftarrow x \cdot G$
+3. $k \leftarrow nonce(x, I)$
+4. $c \leftarrow challenge(Y, I, O, k \cdot G, k \cdot I, ad)$
+5. $s \leftarrow (k + c \cdot x)$
+6. $\pi \leftarrow (c, s)$
+7. **return** $(O, \pi)$
 
 **Externals**:
 
@@ -160,11 +161,11 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 **Inputs**:  
 
-- $pk$: Public key $\in \G$
-- $input$: $Input \in \G$
+- $Y$: Public key $\in \G$
+- $I$: VRF Input $\in \G$
 - $ad$: Additional data octet-string
-- $output$: $Output \in \G$
-- $proof$: As defined for $Sign$ output.
+- $O$: VRF Output $\in \G$
+- $\pi$: As defined for $Sign$ output.
 
 **Outputs**:  
 
@@ -172,10 +173,10 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 **Steps**:
 
-1. $(c, s) \leftarrow proof$
-2. $U \leftarrow s \cdot K - c \cdot pk$
-3. $V \leftarrow s \cdot H - c \cdot output$
-4. $c' \leftarrow challenge(pk, input, output, U, V)$
+1. $(c, s) \leftarrow \pi$
+2. $U \leftarrow s \cdot K - c \cdot Y$
+3. $V \leftarrow s \cdot H - c \cdot O$
+4. $c' \leftarrow challenge(Y, I, O, U, V, ad)$
 5. **if** $c \neq c'$ **then** **return** False
 6. **return** True
 
@@ -199,59 +200,55 @@ corresponds to the public key of the signer.
 ## 4.1. Setup
 
 Pedersen VRF is initiated for prime subgroup $\G$ of an elliptic curve $E$
-with $K, B \in \G$ defined to be the *key base* and *blinding base* respectively.
+with *blinding base* $B \in \G$ defined as:
 
-In this specification we pick as much as possible from the [Bandersnatch Cipher Suite]
-specification.
-
-- $K$ is set equal to group generator $G$ already defined.
-- $B$ is defined as:
-  - $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
-  - $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
+- $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
+- $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
 
 In twisted Edwards coordinates.
+
+For all the other configurable parameters and external functions we'll pick as
+much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF.
 
 ### 4.2. Sign
 
 **Inputs**:
 
-- $sk$: Secret key $\in \F$.
-- $input$: $VRFInput \in \G$.
+- $x$: Secret key $\in \F$
+- $I$: VRF Input $\in \G$
 - $ad$: Additional data octet-string
 
 **Output**:
 
-- $output$: $Output \in \G$
-- $proof$: Pedersen proof $\in (\G, \G, \G, \F, \F)$
+- $O$: VRF $Output \in \G$
+- $\pi$: Pedersen proof $\in (\G, \G, \G, \F, \F)$
 
 **Steps**:
 
-1. $output \leftarrow sk \cdot input$
-2. $krand \leftarrow random()$
-3. $brand \leftarrow random()$
-4. $KBrand \leftarrow krand \cdot G + brand \cdot B$
-5. $POrand \leftarrow krand \cdot input$
-6. $sb \leftarrow random()$
-7. $compk \leftarrow sk \cdot G + sb \cdot B$
-8. $c \leftarrow challenge(compk, KBrand, POrand, ad)$
-9. $ks \leftarrow krand + c \cdot sk$
-10. $bs \leftarrow brand + c \cdot sb$
-11. $proof \leftarrow (compk, KBrand, PORand, ks, bs)$
-12. **return** $(output, proof)$
+1. $O \leftarrow x \cdot I$
+2. $(b, k, k_b) \leftarrow random()$
+3. $Y_c \leftarrow x \cdot G + b \cdot B$
+4. $KB_r \leftarrow k \cdot G + k_b \cdot B$
+5. $O_k \leftarrow k \cdot I$
+6. $c \leftarrow challenge(Y_c, KB_r, O_k, ad)$
+7. $s \leftarrow k + c \cdot x$
+8. $s_b \leftarrow k_b + c \cdot b$
+9. $\pi \leftarrow (Y_c, KB_r, O_k, s, s_b)$
+10. **return** $(O, \pi)$
 
 **Externals**:
 
 - $challenge$: see [Challenge] section
-- $random$: generates a random scalar in $\F$
+- $random$: generates random scalars in $\F$
 
 ## 4.3. Verify  
 
 **Inputs**:  
 
-- $input$: $Input \in \G$.
-- $output$: $Output \in \G$.
+- $I$: VRF Input $\in \G$.
+- $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
-- $proof$: As defined for $Sign$ output.
+- $\pi$: Pedersen proof as defined for $Sign$.
 
 **Output**:  
 
@@ -259,12 +256,12 @@ In twisted Edwards coordinates.
 
 **Steps**:
 
-1. $(compk, KBrand, PORand, ks, bs) \leftarrow proof$
-2. $c \rightarrow challenge(compk, KBrand, POrand, ad)$
-3. $z1 \leftarrow POrand + c \cdot output - input \cdot ks$
-4. **if** $z1 \neq O$ **then** **return** False
-5. $z2 \leftarrow KBrand + c \cdot compk - ks \cdot G - bs \cdot B$
-6. **if** $z2 \neq O$ **then** **return** False
+1. $(Y_c, KB_r, O_k, s, s_b) \leftarrow \pi$
+2. $c \leftarrow challenge(Y_c, KB_r, O_k, ad)$
+3. $z_1 \leftarrow O_k + c \cdot O - I \cdot s$
+4. **if** $z_1 \neq O$ **then** **return** False
+5. $z_2 \leftarrow KB_r + c \cdot Y_c - s \cdot G - s_b \cdot B$
+6. **if** $z_2 \neq O$ **then** **return** False
 7. **return** True
 
 **Externals**:
@@ -277,21 +274,21 @@ Defined similarly to the challenge procedure specified by section 5.4.3 of [RFC9
 
 **Inputs**:  
 
-- $points$: Sequence of points $\in \G$.
+- $Points$: Sequence of points $\in \G$.
 - $ad$: Additional data octet-string
 
 **Output**:  
 
-- Scalar $\in \F$.  
+- $c$: Challenge $\in \F$.  
 
 **Steps**:
 
 1. $str$ = `"pedersen_vrf"` (ASCII encoded octet-string)
-2. **for** $p$ **in** $points$: $str = str \Vert PointToString(obj)$
+2. **for** $P$ **in** $Points$: $str = str \Vert PointToString(P)$
 3. $str = str \Vert ad \Vert 0x00$
 4. $h = Sha512(str)$
-5. $ht = h[0] .. h[31]$
-6. $c = StringToInt(ht)$
+5. $h_t = h[0] \Vert .. \Vert h[31]$
+6. $c = StringToInt(h_t)$
 7. **return** $c$
 
 With $PointToString$ and $StringToInt$ defined as `point_to_string` and `string_to_int`
@@ -314,43 +311,43 @@ TODO:
 
 **Inputs**:
 
-- $sk$: Secret key $\in \F$.
-- $input$: $Input \in \G$.
+- $x$: Secret key $\in \F$.
+- $I$: VRF Input $\in \G$.
 - $ad$: Additional data octet-string
 - $P$: Ring prover key
 
 **Output**:
 
-- $output$: $Output \in \G$.
-- $pproof$: Pedersen proof as specified in Pedersen VRF spec.
-- $zproof$: Ring proof (TODO)
+- $O$: VRF Output $\in \G$.
+- $\pi_p$: Pedersen proof as specified in [Pedersen VRF].
+- $\pi_r$: Ring proof as specified in [Sergey]
 
 **Steps**:
 
-1. $(output, pproof) \leftarrow PedersenSign(sk, input, ad)$
-2. $zproof \leftarrow RingProve(...)$ (TODO)
+1. $(O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)$
+2. $\pi_r \leftarrow Ring.Prove(P, ...)$ (TODO)
 
 ## 5.3. Verify
 
 **Inputs**:  
 
-- $input$: $Input \in \G$.
-- $output$: $Output \in \G$.
+- $I$: VRF Input $\in \G$.
+- $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
 - $V$: ring verifier key $\in ?$
-- $pproof$: Pedersen proof as defined in Pedersen VRF spec
-- $zproof$: Ring proof $\in ?$
+- $\pi_p$: Pedersen proof as defined in Pedersen VRF.
+- $\pi_r$: Ring proof as defined in [Sergey]
 
 **Output**:  
 
-- True if proof is valid, False otherwise.  
+- True if proof is valid, False otherwise.
 
 **Steps**:
 
-- 1. $res = PedersenVerify(pk, input, output, ad, pproof)$
-- 2. **if** $res \neq True$ **return** False
-- 3. $res = RingVerify(...)$ (TODO)
-- 4. **if** $res \neq True$ **return** False
+- 1. $r = Pedersen.Verify(I, O, ad, \pi_p)$
+- 2. **if** $r \neq True$ **return** False
+- 3. $r = Ring.Verify(V, \pi_r, ...)$ (TODO)
+- 4. **if** $r \neq True$ **return** False
 - 4. **return** True
 
 
@@ -360,3 +357,4 @@ TODO:
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381
 [Bandersnatch]: https://eprint.iacr.org/2021/1152
+[Sergey]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA

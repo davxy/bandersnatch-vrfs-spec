@@ -260,9 +260,9 @@ guidelines and naming conventions.
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): Secret key \(\in \mathbb{Z}^*_r\)
+  \(x\): Secret key \(\in \mathbb{Z}^*_r\)
 \item
-  \(input\): \(Input \in \langle G \rangle\)
+  \(I\): VRF Input \(\in \langle G \rangle\)
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -272,9 +272,9 @@ guidelines and naming conventions.
 \begin{itemize}
 \tightlist
 \item
-  \(output\): \(Output \in \langle G \rangle\)
+  \(O\): VRF Output \(\in \langle G \rangle\)
 \item
-  \(proof\): A \emph{Schnorr-like} proof
+  \(\pi\): \emph{Schnorr-like} proof
   \(\in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
 \end{itemize}
 
@@ -284,17 +284,19 @@ guidelines and naming conventions.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(output \leftarrow sk \cdot input\)
+  \(O \leftarrow x \cdot I\)
 \item
-  \(k \leftarrow nonce(sk, input)\)
+  \(Y \leftarrow x \cdot G\)
 \item
-  \(c \leftarrow challenge(pk, input, output, k \cdot G, k \cdot input)\)
+  \(k \leftarrow nonce(x, I)\)
 \item
-  \(s \leftarrow (k + c \cdot sk)\)
+  \(c \leftarrow challenge(Y, I, O, k \cdot G, k \cdot I, ad)\)
 \item
-  \(proof \leftarrow (c, s)\)
+  \(s \leftarrow (k + c \cdot x)\)
 \item
-  \textbf{return} \((output, proof)\)
+  \(\pi \leftarrow (c, s)\)
+\item
+  \textbf{return} \((O, \pi)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -317,15 +319,15 @@ guidelines and naming conventions.
 \begin{itemize}
 \tightlist
 \item
-  \(pk\): Public key \(\in \langle G \rangle\)
+  \(Y\): Public key \(\in \langle G \rangle\)
 \item
-  \(input\): \(Input \in \langle G \rangle\)
+  \(I\): VRF Input \(\in \langle G \rangle\)
 \item
   \(ad\): Additional data octet-string
 \item
-  \(output\): \(Output \in \langle G \rangle\)
+  \(O\): VRF Output \(\in \langle G \rangle\)
 \item
-  \(proof\): As defined for \(Sign\) output.
+  \(\pi\): As defined for \(Sign\) output.
 \end{itemize}
 
 \textbf{Outputs}:
@@ -342,13 +344,13 @@ guidelines and naming conventions.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((c, s) \leftarrow proof\)
+  \((c, s) \leftarrow \pi\)
 \item
-  \(U \leftarrow s \cdot K - c \cdot pk\)
+  \(U \leftarrow s \cdot K - c \cdot Y\)
 \item
-  \(V \leftarrow s \cdot H - c \cdot output\)
+  \(V \leftarrow s \cdot H - c \cdot O\)
 \item
-  \(c' \leftarrow challenge(pk, input, output, U, V)\)
+  \(c' \leftarrow challenge(Y, I, O, U, V, ad)\)
 \item
   \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
 \item
@@ -381,31 +383,24 @@ signer.
 \subsection{4.1. Setup}\label{setup-1}}
 
 Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of an
-elliptic curve \(E\) with \(K, B \in \langle G \rangle\) defined to be
-the \emph{key base} and \emph{blinding base} respectively.
-
-In this specification we pick as much as possible from the
-{[}Bandersnatch Cipher Suite{]} specification.
+elliptic curve \(E\) with \emph{blinding base}
+\(B \in \langle G \rangle\) defined as:
 
 \begin{itemize}
 \tightlist
 \item
-  \(K\) is set equal to group generator \(G\) already defined.
+  \(B.x\) :=
+  \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}
 \item
-  \(B\) is defined as:
-
-  \begin{itemize}
-  \tightlist
-  \item
-    \(B.x\) :=
-    \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}
-  \item
-    \(B.y\) :=
-    \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}
-  \end{itemize}
+  \(B.y\) :=
+  \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}
 \end{itemize}
 
 In twisted Edwards coordinates.
+
+For all the other configurable parameters and external functions we'll
+pick as much as possible from the {[}Bandersnatch Cipher Suite{]}
+specification for IETF VRF.
 
 \hypertarget{sign-1}{%
 \subsubsection{4.2. Sign}\label{sign-1}}
@@ -415,9 +410,9 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
+  \(x\): Secret key \(\in \mathbb{Z}^*_r\)
 \item
-  \(input\): \(VRFInput \in \langle G \rangle\).
+  \(I\): VRF Input \(\in \langle G \rangle\)
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -427,9 +422,9 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  \(output\): \(Output \in \langle G \rangle\)
+  \(O\): VRF \(Output \in \langle G \rangle\)
 \item
-  \(proof\): Pedersen proof
+  \(\pi\): Pedersen proof
   \(\in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
 \end{itemize}
 
@@ -439,29 +434,25 @@ In twisted Edwards coordinates.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(output \leftarrow sk \cdot input\)
+  \(O \leftarrow x \cdot I\)
 \item
-  \(krand \leftarrow random()\)
+  \((b, k, k_b) \leftarrow random()\)
 \item
-  \(brand \leftarrow random()\)
+  \(Y_c \leftarrow x \cdot G + b \cdot B\)
 \item
-  \(KBrand \leftarrow krand \cdot G + brand \cdot B\)
+  \(KB_r \leftarrow k \cdot G + k_b \cdot B\)
 \item
-  \(POrand \leftarrow krand \cdot input\)
+  \(O_k \leftarrow k \cdot I\)
 \item
-  \(sb \leftarrow random()\)
+  \(c \leftarrow challenge(Y_c, KB_r, O_k, ad)\)
 \item
-  \(compk \leftarrow sk \cdot G + sb \cdot B\)
+  \(s \leftarrow k + c \cdot x\)
 \item
-  \(c \leftarrow challenge(compk, KBrand, POrand, ad)\)
+  \(s_b \leftarrow k_b + c \cdot b\)
 \item
-  \(ks \leftarrow krand + c \cdot sk\)
+  \(\pi \leftarrow (Y_c, KB_r, O_k, s, s_b)\)
 \item
-  \(bs \leftarrow brand + c \cdot sb\)
-\item
-  \(proof \leftarrow (compk, KBrand, PORand, ks, bs)\)
-\item
-  \textbf{return} \((output, proof)\)
+  \textbf{return} \((O, \pi)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -471,7 +462,7 @@ In twisted Edwards coordinates.
 \item
   \(challenge\): see {[}Challenge{]} section
 \item
-  \(random\): generates a random scalar in \(\mathbb{Z}^*_r\)
+  \(random\): generates random scalars in \(\mathbb{Z}^*_r\)
 \end{itemize}
 
 \hypertarget{verify-1}{%
@@ -482,13 +473,13 @@ In twisted Edwards coordinates.
 \begin{itemize}
 \tightlist
 \item
-  \(input\): \(Input \in \langle G \rangle\).
+  \(I\): VRF Input \(\in \langle G \rangle\).
 \item
-  \(output\): \(Output \in \langle G \rangle\).
+  \(O\): VRF Output \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \(proof\): As defined for \(Sign\) output.
+  \(\pi\): Pedersen proof as defined for \(Sign\).
 \end{itemize}
 
 \textbf{Output}:
@@ -505,17 +496,17 @@ In twisted Edwards coordinates.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((compk, KBrand, PORand, ks, bs) \leftarrow proof\)
+  \((Y_c, KB_r, O_k, s, s_b) \leftarrow \pi\)
 \item
-  \(c \rightarrow challenge(compk, KBrand, POrand, ad)\)
+  \(c \leftarrow challenge(Y_c, KB_r, O_k, ad)\)
 \item
-  \(z1 \leftarrow POrand + c \cdot output - input \cdot ks\)
+  \(z_1 \leftarrow O_k + c \cdot O - I \cdot s\)
 \item
-  \textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False
+  \textbf{if} \(z_1 \neq O\) \textbf{then} \textbf{return} False
 \item
-  \(z2 \leftarrow KBrand + c \cdot compk - ks \cdot G - bs \cdot B\)
+  \(z_2 \leftarrow KB_r + c \cdot Y_c - s \cdot G - s_b \cdot B\)
 \item
-  \textbf{if} \(z2 \neq O\) \textbf{then} \textbf{return} False
+  \textbf{if} \(z_2 \neq O\) \textbf{then} \textbf{return} False
 \item
   \textbf{return} True
 \end{enumerate}
@@ -539,7 +530,7 @@ of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 \begin{itemize}
 \tightlist
 \item
-  \(points\): Sequence of points \(\in \langle G \rangle\).
+  \(Points\): Sequence of points \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -549,7 +540,7 @@ of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 \begin{itemize}
 \tightlist
 \item
-  Scalar \(\in \mathbb{Z}^*_r\).
+  \(c\): Challenge \(\in \mathbb{Z}^*_r\).
 \end{itemize}
 
 \textbf{Steps}:
@@ -560,16 +551,16 @@ of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 \item
   \(str\) = \texttt{"pedersen\_vrf"} (ASCII encoded octet-string)
 \item
-  \textbf{for} \(p\) \textbf{in} \(points\):
-  \(str = str \Vert PointToString(obj)\)
+  \textbf{for} \(P\) \textbf{in} \(Points\):
+  \(str = str \Vert PointToString(P)\)
 \item
   \(str = str \Vert ad \Vert 0x00\)
 \item
   \(h = Sha512(str)\)
 \item
-  \(ht = h[0] .. h[31]\)
+  \(h_t = h[0] \Vert .. \Vert h[31]\)
 \item
-  \(c = StringToInt(ht)\)
+  \(c = StringToInt(h_t)\)
 \item
   \textbf{return} \(c\)
 \end{enumerate}
@@ -598,9 +589,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(sk\): Secret key \(\in \mathbb{Z}^*_r\).
+  \(x\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
-  \(input\): \(Input \in \langle G \rangle\).
+  \(I\): VRF Input \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
@@ -612,11 +603,12 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(output\): \(Output \in \langle G \rangle\).
+  \(O\): VRF Output \(\in \langle G \rangle\).
 \item
-  \(pproof\): Pedersen proof as specified in Pedersen VRF spec.
+  \(\pi_p\): Pedersen proof as specified in {[}Pedersen VRF{]}.
 \item
-  \(zproof\): Ring proof (TODO)
+  \(\pi_r\): Ring proof as specified in
+  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Sergey}
 \end{itemize}
 
 \textbf{Steps}:
@@ -625,9 +617,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((output, pproof) \leftarrow PedersenSign(sk, input, ad)\)
+  \((O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)\)
 \item
-  \(zproof \leftarrow RingProve(...)\) (TODO)
+  \(\pi_r \leftarrow Ring.Prove(P, ...)\) (TODO)
 \end{enumerate}
 
 \hypertarget{verify-2}{%
@@ -638,17 +630,18 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(input\): \(Input \in \langle G \rangle\).
+  \(I\): VRF Input \(\in \langle G \rangle\).
 \item
-  \(output\): \(Output \in \langle G \rangle\).
+  \(O\): VRF Output \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
   \(V\): ring verifier key \(\in ?\)
 \item
-  \(pproof\): Pedersen proof as defined in Pedersen VRF spec
+  \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
 \item
-  \(zproof\): Ring proof \(\in ?\)
+  \(\pi_r\): Ring proof as defined in
+  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Sergey}
 \end{itemize}
 
 \textbf{Output}:
@@ -667,7 +660,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \def\labelenumi{\arabic{enumi}.}
   \tightlist
   \item
-    \(res = PedersenVerify(pk, input, output, ad, pproof)\)
+    \(r = Pedersen.Verify(I, O, ad, \pi_p)\)
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -675,7 +668,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \setcounter{enumi}{1}
   \tightlist
   \item
-    \textbf{if} \(res \neq True\) \textbf{return} False
+    \textbf{if} \(r \neq True\) \textbf{return} False
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -683,7 +676,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \setcounter{enumi}{2}
   \tightlist
   \item
-    \(res = RingVerify(...)\) (TODO)
+    \(r = Ring.Verify(V, \pi_r, ...)\) (TODO)
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -691,7 +684,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \setcounter{enumi}{3}
   \tightlist
   \item
-    \textbf{if} \(res \neq True\) \textbf{return} False
+    \textbf{if} \(r \neq True\) \textbf{return} False
   \end{enumerate}
 \item
   \begin{enumerate}
