@@ -5,7 +5,7 @@ author:
   - Davide Galassi
 ---
 
-Draft 2 - 04-04-2024
+Draft 3 - 05-04-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
