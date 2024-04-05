@@ -45,6 +45,29 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\newlength{\cslhangindent}
+\setlength{\cslhangindent}{1.5em}
+\newlength{\csllabelwidth}
+\setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
+\newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
+ {% don't indent paragraphs
+  \setlength{\parindent}{0pt}
+  % turn on hanging indent if param 1 is 1
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
+  \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
+ }%
+ {}
+\usepackage{calc}
+\newcommand{\CSLBlock}[1]{#1\hfill\break}
+\newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
+\newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
+\newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -62,6 +85,21 @@ Draft 2 - 04-04-2024
 \newcommand{\F}{\mathbb{Z}^*_r}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{abstract}{%
+\section{\texorpdfstring{\emph{Abstract}}{Abstract}}\label{abstract}}
+
+This technical specification introduces the Verifiable Random Function
+with Additional Data (VRF-AD), a cryptographic construct that extends
+the capabilities of the IETF's Elliptic Curve Verifiable Random
+Functions (ECVRF) as defined in
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}. The
+document also discusses the Pedersen VRF, a novel variation proposed by
+\href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]}, which serves
+as a fundamental component for implementing anonymized ring signatures.
+Additionally, the specification provides detailed insights into the
+usage of these primitives within the {[}Bandersnatch{]} {[}3{]}, an
+elliptic curve constructed over the BLS12-381 scalar field.
 
 \hypertarget{introduction}{%
 \section{1. Introduction}\label{introduction}}
@@ -96,8 +134,7 @@ All VRFs described in this specification are EC-VRF.
 
 A point in \(\langle G \rangle\) and generated using a \(msg\)
 octet-string via the \emph{Elligator 2} \emph{hash-to-curve} algorithm
-described by section 6.8.2 of
-\href{https://datatracker.ietf.org/doc/rfc9380/}{RFC9380}.
+described by section 6.8.2 of {[}4{]}.
 
 Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
 
@@ -114,7 +151,7 @@ A fixed length octet-string generated using VRF output point.
 
 The generation procedure details are specified by the proof-to-hash
 procedure in section 5.2 of
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} and the output
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} and the output
 length depends on the used hasher
 
 Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
@@ -123,7 +160,7 @@ Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
 \section{3. IETF VRF}\label{ietf-vrf}}
 
 Definition of a VRF based on the IETF
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} specification.
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} specification.
 
 This VRF faithfully follows the RFC but extends it with the capability
 to sign additional user data (\texttt{ad}) as per our definition of
@@ -140,15 +177,14 @@ str = str || ad || challenge_generation_domain_separator_back
 
 Setup follows from the \emph{``cipher suite''} specification defined by
 faithfully following the
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section 5.5
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} section 5.5
 guidelines and naming conventions.
 
 \begin{itemize}
 \item
   The EC group \(\langle G \rangle\) is the prime subgroup of the
   Bandersnatch elliptic curve, in Twisted Edwards form, with the finite
-  field and curve parameters as specified in the
-  \href{https://neuromancer.sk/std/bls/Bandersnatch}{neuromancer}
+  field and curve parameters as specified in the {[}neuromancer{]}
   standard curves database. For this group, \texttt{fLen} =
   \texttt{qLen} = 32 and \texttt{cofactor} = 4.
 \item
@@ -182,7 +218,7 @@ guidelines and naming conventions.
   (i.e.~\(Encode(pk)\)).
 \item
   The \texttt{ECVRF\_nonce\_generation} function is specified in Section
-  5.4.2.1 of \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
+  5.4.2.1 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 \item
   The \texttt{int\_to\_string} function encodes into the 32 bytes little
   endian representation.
@@ -209,9 +245,8 @@ guidelines and naming conventions.
   The \texttt{ECVRF\_encode\_to\_curve} function (\emph{Elligator2}) is
   as specified in Section 5.4.1.2, with \texttt{h2c\_suite\_ID\_string}
   = \texttt{"BANDERSNATCH\_XMD:SHA-512\_ELL2\_RO\_"}. The suite must be
-  interpreted as defined by Section 8.5 of
-  \href{https://datatracker.ietf.org/doc/rfc9380/}{RFC9380} and using
-  the domain separation tag
+  interpreted as defined by Section 8.5 of {[}4{]} and using the domain
+  separation tag
   \texttt{DST\ =\ "ECVRF\_"\ \textbar{}\textbar{}\ h2c\_suite\_ID\_string\ \textbar{}\textbar{}\ suite\_string}.
 \end{itemize}
 
@@ -266,12 +301,10 @@ guidelines and naming conventions.
 \tightlist
 \item
   \(nonce\): refer to
-  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
-  5.4.2
+  \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} section 5.4.2
 \item
   \(challenge\): refer to
-  \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} section
-  5.4.3
+  \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} section 5.4.3
 \end{itemize}
 
 \hypertarget{verify}{%
@@ -497,7 +530,7 @@ In twisted Edwards coordinates.
 \subsection{4.4. Challenge}\label{challenge}}
 
 Defined similarly to the challenge procedure specified by section 5.4.3
-of \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
+of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 
 \textbf{Inputs}:
 
@@ -541,7 +574,7 @@ of \href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381}.
 
 With \(PointToString\) and \(StringToInt\) defined as
 \texttt{point\_to\_string} and \texttt{string\_to\_int} from
-\href{https://datatracker.ietf.org/doc/rfc9381/}{RFC9381} respectively.
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} respectively.
 
 \hypertarget{pedersen-ring-vrf}{%
 \section{5. Pedersen Ring VRF}\label{pedersen-ring-vrf}}
@@ -671,6 +704,32 @@ TODO: - SRS for zk-SNARK definition - All the details
 \hypertarget{references}{%
 \section{6. References}\label{references}}
 
-TODO
+\hypertarget{refs}{}
+\begin{CSLReferences}{0}{0}
+\leavevmode\vadjust pre{\hypertarget{ref-RFC9381}{}}%
+\CSLLeftMargin{1. }
+\CSLRightInline{Internet Engineering Task Force (2023)
+\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
+Functions}}. {RFC Editor}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Burdges}{}}%
+\CSLLeftMargin{2. }
+\CSLRightInline{Burdges J, Ciobotaru O, Alper HK, et al (2023)
+\href{https://eprint.iacr.org/2023/002}{Ring verifiable random functions
+and zero-knowledge continuations}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Bandersnatch}{}}%
+\CSLLeftMargin{3. }
+\CSLRightInline{Masson S, Sanso A, Zhang Z (2021)
+\href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A fast elliptic
+curve built over the BLS12-381 scalar field}}
+
+\leavevmode\vadjust pre{\hypertarget{ref-RFC9380}{}}%
+\CSLLeftMargin{4. }
+\CSLRightInline{Internet Engineering Task Force (2023)
+\href{https://datatracker.ietf.org/doc/rfc9380}{{Hashing to Elliptic
+Curves}}. {RFC Editor}}
+
+\end{CSLReferences}
 
 \end{document}

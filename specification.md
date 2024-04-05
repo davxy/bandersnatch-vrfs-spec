@@ -12,6 +12,19 @@ Draft 2 - 04-04-2024
 
 ---
 
+# *Abstract*
+
+This technical specification introduces the Verifiable Random Function
+with Additional Data (VRF-AD), a cryptographic construct that extends the
+capabilities of the IETF's Elliptic Curve Verifiable Random Functions (ECVRF)
+as defined in [RFC9381] [@RFC9381]. The document also discusses the Pedersen
+VRF, a novel variation proposed by [Burdges] [@Burdges], which serves as a
+fundamental component for implementing anonymized ring signatures. Additionally,
+the specification provides detailed insights into the usage of these primitives
+within the [Bandersnatch] [@Bandersnatch], an elliptic curve constructed over the
+BLS12-381 scalar field.
+
+
 # 1. Introduction
 
 **Definition**: A *verifiable random function with additional data (VRF-AD)*
@@ -36,7 +49,7 @@ All VRFs described in this specification are EC-VRF.
 ## 2.1. VRF Input
 
 A point in $\G$ and generated using a $msg$ octet-string via the *Elligator 2*
-*hash-to-curve* algorithm described by section 6.8.2 of [RFC9380].
+*hash-to-curve* algorithm described by section 6.8.2 of [@RFC9380].
 
 Refer to [Bandersnatch Cipher Suite] for configuration details.
 
@@ -113,7 +126,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 * The `ECVRF_encode_to_curve` function (*Elligator2*) is as specified in
   Section 5.4.1.2, with `h2c_suite_ID_string` = `"BANDERSNATCH_XMD:SHA-512_ELL2_RO_"`.
-  The suite must be interpreted as defined by Section 8.5 of [RFC9380](https://datatracker.ietf.org/doc/rfc9380/)
+  The suite must be interpreted as defined by Section 8.5 of [@RFC9380]
   and using the domain separation tag `DST = "ECVRF_" || h2c_suite_ID_string || suite_string`.
 
 ## 3.2. Sign
@@ -343,9 +356,7 @@ TODO:
 
 # 6. References
 
-TODO
-
-
-[RFC9380]: https://datatracker.ietf.org/doc/rfc9380/
-[RFC9381]: https://datatracker.ietf.org/doc/rfc9381/
-[neuromancer]: https://neuromancer.sk/std/bls/Bandersnatch
+[Burdges]: https://eprint.iacr.org/2023/002
+[RFC9380]: https://datatracker.ietf.org/doc/rfc9380
+[RFC9381]: https://datatracker.ietf.org/doc/rfc9381
+<!-- [neuromancer]: https://neuromancer.sk/std/bls/Bandersnatch -->
