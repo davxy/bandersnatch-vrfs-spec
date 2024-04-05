@@ -98,7 +98,8 @@ document also discusses the Pedersen VRF, a novel variation proposed by
 \href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]}, which serves
 as a fundamental component for implementing anonymized ring signatures.
 Additionally, the specification provides detailed insights into the
-usage of these primitives within the {[}Bandersnatch{]} {[}3{]}, an
+usage of these primitives within the
+\href{https://eprint.iacr.org/2021/1152}{Bandersnatch} {[}3{]}, an
 elliptic curve constructed over the BLS12-381 scalar field.
 
 \hypertarget{introduction}{%
@@ -134,7 +135,8 @@ All VRFs described in this specification are EC-VRF.
 
 A point in \(\langle G \rangle\) and generated using a \(msg\)
 octet-string via the \emph{Elligator 2} \emph{hash-to-curve} algorithm
-described by section 6.8.2 of {[}4{]}.
+described by section 6.8.2 of
+\href{https://datatracker.ietf.org/doc/rfc9380}{RFC9380} {[}4{]}.
 
 Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
 
@@ -282,17 +284,17 @@ guidelines and naming conventions.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(preout \leftarrow sk \cdot input\)
+  \(output \leftarrow sk \cdot input\)
 \item
   \(k \leftarrow nonce(sk, input)\)
 \item
-  \(c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)\)
+  \(c \leftarrow challenge(pk, input, output, k \cdot G, k \cdot input)\)
 \item
   \(s \leftarrow (k + c \cdot x)\)
 \item
   \(proof \leftarrow (c, s)\)
 \item
-  \textbf{return} \((preout, proof)\)
+  \textbf{return} \((output, proof)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -344,7 +346,7 @@ guidelines and naming conventions.
 \item
   \(U \leftarrow s \cdot K - c \cdot pk\)
 \item
-  \(V \leftarrow s \cdot H - c \cdot preout\)
+  \(V \leftarrow s \cdot H - c \cdot output\)
 \item
   \(c' \leftarrow challenge(pk, input, output, U, V)\)
 \item
@@ -507,7 +509,7 @@ In twisted Edwards coordinates.
 \item
   \(c \rightarrow challenge(compk, KBrand, POrand, ad)\)
 \item
-  \(z1 \leftarrow POrand + c \cdot preout - input \cdot ks\)
+  \(z1 \leftarrow POrand + c \cdot output - input \cdot ks\)
 \item
   \textbf{if} \(z1 \neq O\) \textbf{then} \textbf{return} False
 \item
@@ -665,7 +667,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \def\labelenumi{\arabic{enumi}.}
   \tightlist
   \item
-    \(res = PedersenVerify(pk, input, preout, ad, pproof)\)
+    \(res = PedersenVerify(pk, input, output, ad, pproof)\)
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -702,7 +704,8 @@ TODO: - SRS for zk-SNARK definition - All the details
 \end{itemize}
 
 \hypertarget{references}{%
-\section{6. References}\label{references}}
+\section*{6. References}\label{references}}
+\addcontentsline{toc}{section}{6. References}
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{0}{0}

@@ -49,7 +49,7 @@ All VRFs described in this specification are EC-VRF.
 ## 2.1. VRF Input
 
 A point in $\G$ and generated using a $msg$ octet-string via the *Elligator 2*
-*hash-to-curve* algorithm described by section 6.8.2 of [@RFC9380].
+*hash-to-curve* algorithm described by section 6.8.2 of [RFC9380] [@RFC9380].
 
 Refer to [Bandersnatch Cipher Suite] for configuration details.
 
@@ -144,12 +144,12 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 **Steps**:
 
-1. $preout \leftarrow sk \cdot input$
+1. $output \leftarrow sk \cdot input$
 2. $k \leftarrow nonce(sk, input)$
-3. $c \leftarrow challenge(Y, H, preout, k \cdot B, k \cdot input)$
+3. $c \leftarrow challenge(pk, input, output, k \cdot G, k \cdot input)$
 4. $s \leftarrow (k + c \cdot x)$
 5. $proof \leftarrow (c, s)$
-5. **return** $(preout, proof)$
+5. **return** $(output, proof)$
 
 **Externals**:
 
@@ -174,7 +174,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 1. $(c, s) \leftarrow proof$
 2. $U \leftarrow s \cdot K - c \cdot pk$
-3. $V \leftarrow s \cdot H - c \cdot preout$
+3. $V \leftarrow s \cdot H - c \cdot output$
 4. $c' \leftarrow challenge(pk, input, output, U, V)$
 5. **if** $c \neq c'$ **then** **return** False
 6. **return** True
@@ -261,7 +261,7 @@ In twisted Edwards coordinates.
 
 1. $(compk, KBrand, PORand, ks, bs) \leftarrow proof$
 2. $c \rightarrow challenge(compk, KBrand, POrand, ad)$
-3. $z1 \leftarrow POrand + c \cdot preout - input \cdot ks$
+3. $z1 \leftarrow POrand + c \cdot output - input \cdot ks$
 4. **if** $z1 \neq O$ **then** **return** False
 5. $z2 \leftarrow KBrand + c \cdot compk - ks \cdot G - bs \cdot B$
 6. **if** $z2 \neq O$ **then** **return** False
@@ -347,7 +347,7 @@ TODO:
 
 **Steps**:
 
-- 1. $res = PedersenVerify(pk, input, preout, ad, pproof)$
+- 1. $res = PedersenVerify(pk, input, output, ad, pproof)$
 - 2. **if** $res \neq True$ **return** False
 - 3. $res = RingVerify(...)$ (TODO)
 - 4. **if** $res \neq True$ **return** False
@@ -359,4 +359,4 @@ TODO:
 [Burdges]: https://eprint.iacr.org/2023/002
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381
-<!-- [neuromancer]: https://neuromancer.sk/std/bls/Bandersnatch -->
+[Bandersnatch]: https://eprint.iacr.org/2021/1152
