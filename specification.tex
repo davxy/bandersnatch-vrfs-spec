@@ -79,7 +79,7 @@
 \begin{document}
 \maketitle
 
-Draft 3 - 05-04-2024
+Draft 4 - 06-04-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
@@ -89,17 +89,20 @@ Draft 3 - 05-04-2024
 \hypertarget{abstract}{%
 \section{\texorpdfstring{\emph{Abstract}}{Abstract}}\label{abstract}}
 
-This technical specification introduces the Verifiable Random Function
-with Additional Data (VRF-AD), a cryptographic construct that extends
-the capabilities of the IETF's Elliptic Curve Verifiable Random
-Functions (ECVRF) as defined in
-\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}. The
-document also discusses the Pedersen VRF, a novel variation proposed by
-\href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]}, which serves
-as a fundamental component for implementing anonymized ring signatures.
-Additionally, the specification provides detailed insights into the
-usage of these primitives within the
-\href{https://eprint.iacr.org/2021/1152}{Bandersnatch} {[}3{]}, an
+This specification delineates the framework for a Verifiable Random
+Function with Additional Data (VRF-AD), a cryptographic construct that
+augments a standard VRF by incorporating auxiliary information into its
+signature. We're going to first provide a specification to extend IETF's
+ECVRF as outlined in
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}.
+Additionally, we describe a variant of the Pedersen VRF, first
+introduced by \href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]},
+which serves as a fundamental component for implementing anonymized ring
+signatures as further elaborated by
+\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev} {[}3{]}. This
+specification provides detailed insights into the usage of these
+primitives within the
+\href{https://eprint.iacr.org/2021/1152}{Bandersnatch} {[}4{]}, an
 elliptic curve constructed over the BLS12-381 scalar field.
 
 \hypertarget{introduction}{%
@@ -136,7 +139,7 @@ All VRFs described in this specification are EC-VRF.
 A point in \(\langle G \rangle\) and generated using a \(msg\)
 octet-string via the \emph{Elligator 2} \emph{hash-to-curve} algorithm
 described by section 6.8.2 of
-\href{https://datatracker.ietf.org/doc/rfc9380}{RFC9380} {[}4{]}.
+\href{https://datatracker.ietf.org/doc/rfc9380}{RFC9380} {[}5{]}.
 
 Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
 
@@ -162,7 +165,8 @@ Refer to {[}Bandersnatch Cipher Suite{]} for configuration details.
 \section{3. IETF VRF}\label{ietf-vrf}}
 
 Definition of a VRF based on the IETF
-\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} specification.
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}
+specification.
 
 This VRF faithfully follows the RFC but extends it with the capability
 to sign additional user data (\texttt{ad}) as per our definition of
@@ -247,7 +251,7 @@ guidelines and naming conventions.
   The \texttt{ECVRF\_encode\_to\_curve} function (\emph{Elligator2}) is
   as specified in Section 5.4.1.2, with \texttt{h2c\_suite\_ID\_string}
   = \texttt{"BANDERSNATCH\_XMD:SHA-512\_ELL2\_RO\_"}. The suite must be
-  interpreted as defined by Section 8.5 of {[}4{]} and using the domain
+  interpreted as defined by Section 8.5 of {[}5{]} and using the domain
   separation tag
   \texttt{DST\ =\ "ECVRF\_"\ \textbar{}\textbar{}\ h2c\_suite\_ID\_string\ \textbar{}\textbar{}\ suite\_string}.
 \end{itemize}
@@ -370,7 +374,7 @@ guidelines and naming conventions.
 
 Pedersen VRF resembles IETF VRF but replaces the public key by a
 Pedersen commitment to the secret key, which makes the Pedersen VRF
-useful in anonymized ring VRFs (see {[}Pedersen Ring VRF{]}).
+useful in anonymized ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the
 output has been generated with a secret key associated with a blinded
@@ -378,6 +382,11 @@ public (instead of public key). The blinded public key is a
 cryptographic commitment to the public key. And it could be unblinded to
 prove that the output of the VRF corresponds to the public key of the
 signer.
+
+This specification mostly follows the design proposed by
+\href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]} in section 4
+with some details about blinding base value and challenge generation
+procedure.
 
 \hypertarget{setup-1}{%
 \subsection{4.1. Setup}\label{setup-1}}
@@ -440,19 +449,19 @@ specification for IETF VRF.
 \item
   \((k, k_b) \leftarrow random()\)
 \item
-  \(Y_c \leftarrow x \cdot G + b \cdot B\)
+  \(\bar{Y} \leftarrow x \cdot G + b \cdot B\)
 \item
-  \(KB_r \leftarrow k \cdot G + k_b \cdot B\)
+  \(R \leftarrow k \cdot G + k_b \cdot B\)
 \item
   \(O_k \leftarrow k \cdot I\)
 \item
-  \(c \leftarrow challenge(Y_c, KB_r, O_k, ad)\)
+  \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
 \item
   \(s \leftarrow k + c \cdot x\)
 \item
   \(s_b \leftarrow k_b + c \cdot b\)
 \item
-  \(\pi \leftarrow (Y_c, KB_r, O_k, s, s_b)\)
+  \(\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)\)
 \item
   \textbf{return} \((O, \pi)\)
 \end{enumerate}
@@ -498,15 +507,15 @@ specification for IETF VRF.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((Y_c, KB_r, O_k, s, s_b) \leftarrow \pi\)
+  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi\)
 \item
-  \(c \leftarrow challenge(Y_c, KB_r, O_k, ad)\)
+  \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
 \item
   \(z_1 \leftarrow O_k + c \cdot O - I \cdot s\)
 \item
   \textbf{if} \(z_1 \neq O\) \textbf{then} \textbf{return} False
 \item
-  \(z_2 \leftarrow KB_r + c \cdot Y_c - s \cdot G - s_b \cdot B\)
+  \(z_2 \leftarrow R + c \cdot \bar{Y} - s \cdot G - s_b \cdot B\)
 \item
   \textbf{if} \(z_2 \neq O\) \textbf{then} \textbf{return} False
 \item
@@ -524,8 +533,8 @@ specification for IETF VRF.
 \hypertarget{challenge}{%
 \subsection{4.4. Challenge}\label{challenge}}
 
-Defined similarly to the challenge procedure specified by section 5.4.3
-of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
+Defined to follow the design of challenge procedure given in section
+5.4.3 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381}.
 
 \textbf{Inputs}:
 
@@ -593,11 +602,11 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(x\): Secret key \(\in \mathbb{Z}^*_r\).
 \item
+  \(P\): Ring prover key
+\item
   \(I\): VRF Input \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
-\item
-  \(P\): Ring prover key
 \end{itemize}
 
 \textbf{Output}:
@@ -610,7 +619,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \(\pi_p\): Pedersen proof as specified in {[}Pedersen VRF{]}.
 \item
   \(\pi_r\): Ring proof as specified in
-  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Sergey}
+  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
 \end{itemize}
 
 \textbf{Steps}:
@@ -632,18 +641,17 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
+  \(V\): ring verifier key \(\in ?\)
+\item
   \(I\): VRF Input \(\in \langle G \rangle\).
 \item
   \(O\): VRF Output \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \(V\): ring verifier key \(\in ?\)
-\item
   \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
 \item
-  \(\pi_r\): Ring proof as defined in
-  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Sergey}
+  \(\pi_r\): Ring proof as defined in {[}Sergey{]}
 \end{itemize}
 
 \textbf{Output}:
@@ -706,27 +714,33 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{CSLReferences}{0}{0}
 \leavevmode\vadjust pre{\hypertarget{ref-RFC9381}{}}%
 \CSLLeftMargin{1. }
-\CSLRightInline{Internet Engineering Task Force (2023)
-\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
-Functions}}. {RFC Editor}}
+\CSLRightInline{Internet Engineering Task Force
+\emph{\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
+Functions}}}; {RFC Editor}, 2023;}
 
 \leavevmode\vadjust pre{\hypertarget{ref-Burdges}{}}%
 \CSLLeftMargin{2. }
-\CSLRightInline{Burdges J, Ciobotaru O, Alper HK, et al (2023)
-\href{https://eprint.iacr.org/2023/002}{Ring verifiable random functions
-and zero-knowledge continuations}}
+\CSLRightInline{Burdges, J.; Ciobotaru, O.; Alper, H.K.; Stewart, A.;
+Vasilyev, S. \href{https://eprint.iacr.org/2023/002}{Ring Verifiable
+Random Functions and Zero-Knowledge Continuations} 2023.}
+
+\leavevmode\vadjust pre{\hypertarget{ref-Vasilyev}{}}%
+\CSLLeftMargin{3. }
+\CSLRightInline{Vasilyev, S.
+\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Ring Proof Technical
+Specification} 2024.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-Bandersnatch}{}}%
-\CSLLeftMargin{3. }
-\CSLRightInline{Masson S, Sanso A, Zhang Z (2021)
-\href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A fast elliptic
-curve built over the BLS12-381 scalar field}}
+\CSLLeftMargin{4. }
+\CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z.
+\href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A Fast Elliptic
+Curve Built over the Bls12-381 Scalar Field} 2021.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-RFC9380}{}}%
-\CSLLeftMargin{4. }
-\CSLRightInline{Internet Engineering Task Force (2023)
-\href{https://datatracker.ietf.org/doc/rfc9380}{{Hashing to Elliptic
-Curves}}. {RFC Editor}}
+\CSLLeftMargin{5. }
+\CSLRightInline{Internet Engineering Task Force
+\emph{\href{https://datatracker.ietf.org/doc/rfc9380}{{Hashing to
+Elliptic Curves}}}; {RFC Editor}, 2023;}
 
 \end{CSLReferences}
 

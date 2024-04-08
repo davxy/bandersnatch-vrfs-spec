@@ -5,7 +5,7 @@ author:
   - Davide Galassi
 ---
 
-Draft 3 - 05-04-2024
+Draft 4 - 06-04-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
@@ -14,13 +14,14 @@ Draft 3 - 05-04-2024
 
 # *Abstract*
 
-This technical specification introduces the Verifiable Random Function
-with Additional Data (VRF-AD), a cryptographic construct that extends the
-capabilities of the IETF's Elliptic Curve Verifiable Random Functions (ECVRF)
-as defined in [RFC9381] [@RFC9381]. The document also discusses the Pedersen
-VRF, a novel variation proposed by [Burdges] [@Burdges], which serves as a
-fundamental component for implementing anonymized ring signatures. Additionally,
-the specification provides detailed insights into the usage of these primitives
+This specification delineates the framework for a Verifiable Random Function with
+Additional Data (VRF-AD), a cryptographic construct that augments a standard VRF
+by incorporating auxiliary information into its signature. We're going to first
+provide a specification to extend IETF's ECVRF as outlined in [RFC9381] [@RFC9381].
+Additionally, we describe a variant of the Pedersen VRF, first introduced by
+[Burdges] [@Burdges], which serves as a fundamental component for implementing
+anonymized ring signatures as further elaborated by [Vasilyev] [@Vasilyev].
+This specification provides detailed insights into the usage of these primitives
 within the [Bandersnatch] [@Bandersnatch], an elliptic curve constructed over the
 BLS12-381 scalar field.
 
@@ -69,7 +70,7 @@ Refer to [Bandersnatch Cipher Suite] for configuration details.
 
 # 3. IETF VRF
 
-Definition of a VRF based on the IETF [RFC9381] specification.
+Definition of a VRF based on the IETF [RFC9381] [@RFC9381] specification.
 
 This VRF faithfully follows the RFC but extends it with the capability to sign
 additional user data (`ad`) as per our definition of VRF-AD.
@@ -189,13 +190,16 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 Pedersen VRF resembles IETF VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in anonymized
-ring VRFs (see [Pedersen Ring VRF]).
+ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the output
 has been generated with a secret key associated with a blinded public (instead
 of public key). The blinded public key is a cryptographic commitment to the
 public key. And it could be unblinded to prove that the output of the VRF
 corresponds to the public key of the signer.
+
+This specification mostly follows the design proposed by [Burdges] [@Burdges]
+in section 4 with some details about blinding base value and challenge generation procedure.
 
 ## 4.1. Setup
 
@@ -228,13 +232,13 @@ much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF
 
 1. $O \leftarrow x \cdot I$
 2. $(k, k_b) \leftarrow random()$
-3. $Y_c \leftarrow x \cdot G + b \cdot B$
-4. $KB_r \leftarrow k \cdot G + k_b \cdot B$
+3. $\bar{Y} \leftarrow x \cdot G + b \cdot B$
+4. $R \leftarrow k \cdot G + k_b \cdot B$
 5. $O_k \leftarrow k \cdot I$
-6. $c \leftarrow challenge(Y_c, KB_r, O_k, ad)$
+6. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
 7. $s \leftarrow k + c \cdot x$
 8. $s_b \leftarrow k_b + c \cdot b$
-9. $\pi \leftarrow (Y_c, KB_r, O_k, s, s_b)$
+9. $\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)$
 10. **return** $(O, \pi)$
 
 **Externals**:
@@ -257,11 +261,11 @@ much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF
 
 **Steps**:
 
-1. $(Y_c, KB_r, O_k, s, s_b) \leftarrow \pi$
-2. $c \leftarrow challenge(Y_c, KB_r, O_k, ad)$
+1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi$
+2. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
 3. $z_1 \leftarrow O_k + c \cdot O - I \cdot s$
 4. **if** $z_1 \neq O$ **then** **return** False
-5. $z_2 \leftarrow KB_r + c \cdot Y_c - s \cdot G - s_b \cdot B$
+5. $z_2 \leftarrow R + c \cdot \bar{Y} - s \cdot G - s_b \cdot B$
 6. **if** $z_2 \neq O$ **then** **return** False
 7. **return** True
 
@@ -271,7 +275,8 @@ much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF
 
 ## 4.4. Challenge
 
-Defined similarly to the challenge procedure specified by section 5.4.3 of [RFC9381].
+Defined to follow the design of challenge procedure given in section 5.4.3 of
+[RFC9381].
 
 **Inputs**:  
 
@@ -313,15 +318,15 @@ TODO:
 **Inputs**:
 
 - $x$: Secret key $\in \F$.
+- $P$: Ring prover key
 - $I$: VRF Input $\in \G$.
 - $ad$: Additional data octet-string
-- $P$: Ring prover key
 
 **Output**:
 
 - $O$: VRF Output $\in \G$.
 - $\pi_p$: Pedersen proof as specified in [Pedersen VRF].
-- $\pi_r$: Ring proof as specified in [Sergey]
+- $\pi_r$: Ring proof as specified in [Vasilyev]
 
 **Steps**:
 
@@ -332,10 +337,10 @@ TODO:
 
 **Inputs**:  
 
+- $V$: ring verifier key $\in ?$
 - $I$: VRF Input $\in \G$.
 - $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
-- $V$: ring verifier key $\in ?$
 - $\pi_p$: Pedersen proof as defined in Pedersen VRF.
 - $\pi_r$: Ring proof as defined in [Sergey]
 
@@ -354,8 +359,8 @@ TODO:
 
 # 6. References
 
-[Burdges]: https://eprint.iacr.org/2023/002
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381
+[Burdges]: https://eprint.iacr.org/2023/002
 [Bandersnatch]: https://eprint.iacr.org/2021/1152
-[Sergey]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA
+[Vasilyev]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA
