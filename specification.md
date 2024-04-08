@@ -22,7 +22,7 @@ Additionally, we describe a variant of the Pedersen VRF, first introduced by
 [Burdges] [@Burdges], which serves as a fundamental component for implementing
 anonymized ring signatures as further elaborated by [Vasilyev] [@Vasilyev].
 This specification provides detailed insights into the usage of these primitives
-within the [Bandersnatch] [@Bandersnatch], an elliptic curve constructed over the
+with [Bandersnatch] [@Bandersnatch], an elliptic curve constructed over the
 BLS12-381 scalar field.
 
 
