@@ -188,28 +188,28 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 # 4. Pedersen VRF
 
-Pedersen VRF resembles IETF VRF but replaces the public key by a Pedersen
+Pedersen VRF resembles IETF EC-VRF but replaces the public key by a Pedersen
 commitment to the secret key, which makes the Pedersen VRF useful in anonymized
 ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the output
-has been generated with a secret key associated with a blinded public (instead
+has been generated with a secret key associated with a blinded public key (instead
 of public key). The blinded public key is a cryptographic commitment to the
 public key. And it could be unblinded to prove that the output of the VRF
 corresponds to the public key of the signer.
 
-This specification mostly follows the design proposed by [Burdges] [@Burdges]
+This specification mostly follows the design proposed by [BCHSV23] [@BCHSV23]
 in section 4 with some details about blinding base value and challenge generation procedure.
 
 ## 4.1. Setup
 
-Pedersen VRF is initiated for prime subgroup $\G$ of an elliptic curve $E$
+Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch elliptic curve $E$ [MSZ21]
 with *blinding base* $B \in \G$ defined as:
 
 - $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
 - $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
 
-In twisted Edwards coordinates.
+in twisted Edwards coordinates.
 
 For all the other configurable parameters and external functions we'll pick as
 much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF.
@@ -280,7 +280,7 @@ Defined to follow the design of challenge procedure given in section 5.4.3 of
 
 **Inputs**:  
 
-- $Points$: Sequence of points $\in \G$.
+- $Points$: Sequence of 5 points $\in \G$.
 - $ad$: Additional data octet-string
 
 **Output**:  
@@ -361,6 +361,7 @@ TODO:
 
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381
-[Burdges]: https://eprint.iacr.org/2023/002
+[BCHSV23]: https://eprint.iacr.org/2023/002
 [Bandersnatch]: https://eprint.iacr.org/2021/1152
 [Vasilyev]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA
+[MSZ21]: https://eprint.iacr.org/2021/1152
