@@ -208,7 +208,7 @@ guidelines and naming conventions.
 \item
   The public key generation primitive is \(pk = sk \cdot G\), with
   \(sk\) the secret key scalar and \(G\) the group generator. In this
-  ciphersuite, the secret scalar \texttt{x} is equal to the secret key
+  cipher suite, the secret scalar \texttt{x} is equal to the secret key
   \texttt{sk}.
 \item
   \texttt{suite\_string} = 0x33.
@@ -386,10 +386,10 @@ generation procedure.
 \hypertarget{setup-1}{%
 \subsection{4.1. Setup}\label{setup-1}}
 
-Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of
-Bandersnatch elliptic curve \(E\)
+Bandersnatch Pedersen VRF is initiated for prime subgroup
+\(\langle G \rangle\) of Bandersnatch elliptic curve \(E\) defined in
 \href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
-\emph{blinding base} \(B \in \langle G \rangle\) defined as:
+\emph{blinding base} \(B \in \langle G \rangle\) defined as follows:
 
 \begin{itemize}
 \tightlist
@@ -403,8 +403,8 @@ Bandersnatch elliptic curve \(E\)
 
 in twisted Edwards coordinates.
 
-For all the other configurable parameters and external functions we'll
-pick as much as possible from the {[}Bandersnatch Cipher Suite{]}
+For all the other configurable parameters and external functions we
+adhere as much as possible to the {[}Bandersnatch Cipher Suite{]}
 specification for IETF VRF.
 
 \hypertarget{sign-1}{%
@@ -647,7 +647,8 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
 \item
-  \(\pi_r\): Ring proof as defined in {[}Sergey{]}
+  \(\pi_r\): Ring proof as defined in
+  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
 \end{itemize}
 
 \textbf{Output}:

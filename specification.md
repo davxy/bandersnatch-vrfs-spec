@@ -98,7 +98,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
   - $G.y$ := `0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166`
 
 - The public key generation primitive is $pk = sk \cdot G$, with $sk$ the secret
-  key scalar and $G$ the group generator. In this ciphersuite, the secret scalar
+  key scalar and $G$ the group generator. In this cipher suite, the secret scalar
   `x` is equal to the secret key `sk`.
 
 - `suite_string` = 0x33.
@@ -203,16 +203,16 @@ in section 4 with some details about blinding base value and challenge generatio
 
 ## 4.1. Setup
 
-Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch elliptic curve $E$ [MSZ21] [@MSZ21]
-with *blinding base* $B \in \G$ defined as:
+Bandersnatch Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch elliptic curve $E$ defined in [MSZ21] [@MSZ21]
+with *blinding base* $B \in \G$ defined as follows:
 
 - $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
 - $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
 
 in twisted Edwards coordinates.
 
-For all the other configurable parameters and external functions we'll pick as
-much as possible from the [Bandersnatch Cipher Suite] specification for IETF VRF.
+For all the other configurable parameters and external functions we adhere as
+much as possible to the [Bandersnatch Cipher Suite] specification for IETF VRF.
 
 ### 4.2. Sign
 
@@ -342,7 +342,7 @@ TODO:
 - $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
 - $\pi_p$: Pedersen proof as defined in Pedersen VRF.
-- $\pi_r$: Ring proof as defined in [Sergey]
+- $\pi_r$: Ring proof as defined in [Vasilyev]
 
 **Output**:  
 
