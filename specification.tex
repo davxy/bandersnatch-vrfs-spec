@@ -6,8 +6,8 @@
 ]{article}
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{iftex}
-\ifPDFTeX
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -37,7 +37,7 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Bandersnatch VRF-AD Specification},
-  pdfauthor={Seyed Hosseini; Davide Galassi},
+  pdfauthor={Davide Galassi; Seyed Hosseini},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
@@ -45,22 +45,22 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
 \setlength{\csllabelwidth}{3em}
-\newlength{\cslentryspacingunit} % times entry-spacing
-\setlength{\cslentryspacingunit}{\parskip}
 \newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
  {% don't indent paragraphs
   \setlength{\parindent}{0pt}
   % turn on hanging indent if param 1 is 1
-  \ifodd #1
-  \let\oldpar\par
-  \def\par{\hangindent=\cslhangindent\oldpar}
-  \fi
+  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
   % set entry spacing
-  \setlength{\parskip}{#2\cslentryspacingunit}
+  \ifnum #2 > 0
+  \setlength{\parskip}{#2\baselineskip}
+  \fi
  }%
  {}
 \usepackage{calc}
@@ -68,12 +68,9 @@
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
-\ifLuaTeX
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 
 \title{Bandersnatch VRF-AD Specification}
-\author{Seyed Hosseini \and Davide Galassi}
+\author{Davide Galassi \and Seyed Hosseini}
 \date{}
 
 \begin{document}
@@ -96,12 +93,11 @@ signature. We're going to first provide a specification to extend IETF's
 ECVRF as outlined in
 \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}.
 Additionally, we describe a variant of the Pedersen VRF, first
-introduced by \href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]},
-which serves as a fundamental component for implementing anonymized ring
-signatures as further elaborated by
-\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev} {[}3{]}. This
-specification provides detailed insights into the usage of these
-primitives with \href{https://eprint.iacr.org/2021/1152}{Bandersnatch}
+introduced by {[}BCHSV23{]} {[}2{]}, which serves as a fundamental
+component for implementing anonymized ring signatures as further
+elaborated by \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
+{[}3{]}. This specification provides detailed insights into the usage of
+these primitives with \href{https://eprint.iacr.org/2021/1152}{MSZ21}
 {[}4{]}, an elliptic curve constructed over the BLS12-381 scalar field.
 
 \hypertarget{introduction}{%
@@ -371,28 +367,29 @@ guidelines and naming conventions.
 \hypertarget{pedersen-vrf}{%
 \section{4. Pedersen VRF}\label{pedersen-vrf}}
 
-Pedersen VRF resembles IETF VRF but replaces the public key by a
+Pedersen VRF resembles IETF EC-VRF but replaces the public key by a
 Pedersen commitment to the secret key, which makes the Pedersen VRF
 useful in anonymized ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the
 output has been generated with a secret key associated with a blinded
-public (instead of public key). The blinded public key is a
+public key (instead of public key). The blinded public key is a
 cryptographic commitment to the public key. And it could be unblinded to
 prove that the output of the VRF corresponds to the public key of the
 signer.
 
 This specification mostly follows the design proposed by
-\href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]} in section 4
-with some details about blinding base value and challenge generation
-procedure.
+\href{https://eprint.iacr.org/2023/002}{BCASV23} {[}\textbf{BCASV23?}{]}
+in section 4 with some details about blinding base value and challenge
+generation procedure.
 
 \hypertarget{setup-1}{%
 \subsection{4.1. Setup}\label{setup-1}}
 
-Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of an
-elliptic curve \(E\) with \emph{blinding base}
-\(B \in \langle G \rangle\) defined as:
+Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of
+Bandersnatch elliptic curve \(E\)
+\href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
+\emph{blinding base} \(B \in \langle G \rangle\) defined as:
 
 \begin{itemize}
 \tightlist
@@ -404,7 +401,7 @@ elliptic curve \(E\) with \emph{blinding base}
   \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}
 \end{itemize}
 
-In twisted Edwards coordinates.
+in twisted Edwards coordinates.
 
 For all the other configurable parameters and external functions we'll
 pick as much as possible from the {[}Bandersnatch Cipher Suite{]}
@@ -540,7 +537,7 @@ Defined to follow the design of challenge procedure given in section
 \begin{itemize}
 \tightlist
 \item
-  \(Points\): Sequence of points \(\in \langle G \rangle\).
+  \(Points\): Sequence of 5 points \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -711,35 +708,30 @@ TODO: - SRS for zk-SNARK definition - All the details
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{0}{0}
-\leavevmode\vadjust pre{\hypertarget{ref-RFC9381}{}}%
+\leavevmode\hypertarget{ref-RFC9381}{}%
 \CSLLeftMargin{1. }
-\CSLRightInline{Internet Engineering Task Force
-\emph{\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
-Functions}}}; {RFC Editor}, 2023;}
+\CSLRightInline{Internet Engineering Task Force \emph{{Verifiable Random
+Functions}}; {RFC Editor}, 2023;}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Burdges}{}}%
+\leavevmode\hypertarget{ref-BCHSV23}{}%
 \CSLLeftMargin{2. }
 \CSLRightInline{Burdges, J.; Ciobotaru, O.; Alper, H.K.; Stewart, A.;
-Vasilyev, S. \href{https://eprint.iacr.org/2023/002}{Ring Verifiable
-Random Functions and Zero-Knowledge Continuations} 2023.}
+Vasilyev, S. Ring Verifiable Random Functions and Zero-Knowledge
+Continuations 2023.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Vasilyev}{}}%
+\leavevmode\hypertarget{ref-Vasilyev}{}%
 \CSLLeftMargin{3. }
-\CSLRightInline{Vasilyev, S.
-\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Ring Proof Technical
-Specification} 2024.}
+\CSLRightInline{Vasilyev, S. Ring Proof Technical Specification 2024.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Bandersnatch}{}}%
+\leavevmode\hypertarget{ref-MSZ21}{}%
 \CSLLeftMargin{4. }
-\CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z.
-\href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A Fast Elliptic
-Curve Built over the Bls12-381 Scalar Field} 2021.}
+\CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z. Bandersnatch: A Fast
+Elliptic Curve Built over the Bls12-381 Scalar Field 2021.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-RFC9380}{}}%
+\leavevmode\hypertarget{ref-RFC9380}{}%
 \CSLLeftMargin{5. }
-\CSLRightInline{Internet Engineering Task Force
-\emph{\href{https://datatracker.ietf.org/doc/rfc9380}{{Hashing to
-Elliptic Curves}}}; {RFC Editor}, 2023;}
+\CSLRightInline{Internet Engineering Task Force \emph{{Hashing to
+Elliptic Curves}}; {RFC Editor}, 2023;}
 
 \end{CSLReferences}
 
