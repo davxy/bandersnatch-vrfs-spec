@@ -5,7 +5,7 @@ author:
   - Seyed Hosseini
 ---
 
-Draft 4 - 06-04-2024
+Draft 5 - 31-05-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
@@ -198,13 +198,14 @@ of public key). The blinded public key is a cryptographic commitment to the
 public key. And it could be unblinded to prove that the output of the VRF
 corresponds to the public key of the signer.
 
-This specification mostly follows the design proposed by [BCASV23] [@BCASV23]
+This specification mostly follows the design proposed by [BCHSV23] [@BCHSV23]
 in section 4 with some details about blinding base value and challenge generation procedure.
 
 ## 4.1. Setup
 
-Bandersnatch Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch elliptic curve $E$ defined in [MSZ21] [@MSZ21]
-with *blinding base* $B \in \G$ defined as follows:
+Bandersnatch Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch 
+elliptic curve $E$ defined in [MSZ21] [@MSZ21] with *blinding base* $B \in \G$
+defined as follows:
 
 - $B.x$ := `0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e`
 - $B.y$ := `0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa`
@@ -361,6 +362,6 @@ TODO:
 
 [RFC9380]: https://datatracker.ietf.org/doc/rfc9380
 [RFC9381]: https://datatracker.ietf.org/doc/rfc9381
-[BCASV23]: https://eprint.iacr.org/2023/002
+[BCHSV23]: https://eprint.iacr.org/2023/002
 [MSZ21]: https://eprint.iacr.org/2021/1152
 [Vasilyev]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA
