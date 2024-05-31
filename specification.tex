@@ -37,7 +37,7 @@
 \IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
 \hypersetup{
   pdftitle={Bandersnatch VRF-AD Specification},
-  pdfauthor={Seyed Hosseini; Davide Galassi},
+  pdfauthor={Davide Galassi; Seyed Hosseini},
   hidelinks,
   pdfcreator={LaTeX via pandoc}}
 \urlstyle{same} % disable monospaced font for URLs
@@ -73,13 +73,13 @@
 \fi
 
 \title{Bandersnatch VRF-AD Specification}
-\author{Seyed Hosseini \and Davide Galassi}
+\author{Davide Galassi \and Seyed Hosseini}
 \date{}
 
 \begin{document}
 \maketitle
 
-Draft 4 - 06-04-2024
+Draft 5 - 31-05-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
@@ -96,13 +96,13 @@ signature. We're going to first provide a specification to extend IETF's
 ECVRF as outlined in
 \href{https://datatracker.ietf.org/doc/rfc9381}{RFC9381} {[}1{]}.
 Additionally, we describe a variant of the Pedersen VRF, first
-introduced by \href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]},
+introduced by \href{https://eprint.iacr.org/2023/002}{BCHSV23} {[}2{]},
 which serves as a fundamental component for implementing anonymized ring
 signatures as further elaborated by
 \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev} {[}3{]}. This
 specification provides detailed insights into the usage of these
-primitives with \href{https://eprint.iacr.org/2021/1152}{Bandersnatch}
-{[}4{]}, an elliptic curve constructed over the BLS12-381 scalar field.
+primitives with \href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]},
+an elliptic curve constructed over the BLS12-381 scalar field.
 
 \hypertarget{introduction}{%
 \section{1. Introduction}\label{introduction}}
@@ -212,7 +212,7 @@ guidelines and naming conventions.
 \item
   The public key generation primitive is \(pk = sk \cdot G\), with
   \(sk\) the secret key scalar and \(G\) the group generator. In this
-  ciphersuite, the secret scalar \texttt{x} is equal to the secret key
+  cipher suite, the secret scalar \texttt{x} is equal to the secret key
   \texttt{sk}.
 \item
   \texttt{suite\_string} = 0x33.
@@ -371,28 +371,29 @@ guidelines and naming conventions.
 \hypertarget{pedersen-vrf}{%
 \section{4. Pedersen VRF}\label{pedersen-vrf}}
 
-Pedersen VRF resembles IETF VRF but replaces the public key by a
+Pedersen VRF resembles IETF EC-VRF but replaces the public key by a
 Pedersen commitment to the secret key, which makes the Pedersen VRF
 useful in anonymized ring VRFs.
 
 Strictly speaking Pederson VRF is not a VRF. Instead, it proves that the
 output has been generated with a secret key associated with a blinded
-public (instead of public key). The blinded public key is a
+public key (instead of public key). The blinded public key is a
 cryptographic commitment to the public key. And it could be unblinded to
 prove that the output of the VRF corresponds to the public key of the
 signer.
 
 This specification mostly follows the design proposed by
-\href{https://eprint.iacr.org/2023/002}{Burdges} {[}2{]} in section 4
+\href{https://eprint.iacr.org/2023/002}{BCHSV23} {[}2{]} in section 4
 with some details about blinding base value and challenge generation
 procedure.
 
 \hypertarget{setup-1}{%
 \subsection{4.1. Setup}\label{setup-1}}
 
-Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of an
-elliptic curve \(E\) with \emph{blinding base}
-\(B \in \langle G \rangle\) defined as:
+Bandersnatch Pedersen VRF is initiated for prime subgroup
+\(\langle G \rangle\) of Bandersnatch elliptic curve \(E\) defined in
+\href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
+\emph{blinding base} \(B \in \langle G \rangle\) defined as follows:
 
 \begin{itemize}
 \tightlist
@@ -404,10 +405,10 @@ elliptic curve \(E\) with \emph{blinding base}
   \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}
 \end{itemize}
 
-In twisted Edwards coordinates.
+in twisted Edwards coordinates.
 
-For all the other configurable parameters and external functions we'll
-pick as much as possible from the {[}Bandersnatch Cipher Suite{]}
+For all the other configurable parameters and external functions we
+adhere as much as possible to the {[}Bandersnatch Cipher Suite{]}
 specification for IETF VRF.
 
 \hypertarget{sign-1}{%
@@ -540,7 +541,7 @@ Defined to follow the design of challenge procedure given in section
 \begin{itemize}
 \tightlist
 \item
-  \(Points\): Sequence of points \(\in \langle G \rangle\).
+  \(Points\): Sequence of 5 points \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -650,7 +651,8 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
 \item
-  \(\pi_r\): Ring proof as defined in {[}Sergey{]}
+  \(\pi_r\): Ring proof as defined in
+  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
 \end{itemize}
 
 \textbf{Output}:
@@ -717,7 +719,7 @@ TODO: - SRS for zk-SNARK definition - All the details
 \emph{\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
 Functions}}}; {RFC Editor}, 2023;}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Burdges}{}}%
+\leavevmode\vadjust pre{\hypertarget{ref-BCHSV23}{}}%
 \CSLLeftMargin{2. }
 \CSLRightInline{Burdges, J.; Ciobotaru, O.; Alper, H.K.; Stewart, A.;
 Vasilyev, S. \href{https://eprint.iacr.org/2023/002}{Ring Verifiable
@@ -729,7 +731,7 @@ Random Functions and Zero-Knowledge Continuations} 2023.}
 \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Ring Proof Technical
 Specification} 2024.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Bandersnatch}{}}%
+\leavevmode\vadjust pre{\hypertarget{ref-MSZ21}{}}%
 \CSLLeftMargin{4. }
 \CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z.
 \href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A Fast Elliptic
