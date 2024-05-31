@@ -3,9 +3,8 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
+date: 31 May 2024 - Draft 5
 ---
-
-Draft 5 - 31-05-2024
 
 \newcommand{\G}{\langle G \rangle}
 \newcommand{\F}{\mathbb{Z}^*_r}
