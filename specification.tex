@@ -6,8 +6,8 @@
 ]{article}
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
-\usepackage{ifxetex,ifluatex}
-\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage{iftex}
+\ifPDFTeX
   \usepackage[T1]{fontenc}
   \usepackage[utf8]{inputenc}
   \usepackage{textcomp} % provide euro and other symbols
@@ -45,22 +45,22 @@
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
-\ifluatex
-  \usepackage{selnolig}  % disable illegal ligatures
-\fi
 \newlength{\cslhangindent}
 \setlength{\cslhangindent}{1.5em}
 \newlength{\csllabelwidth}
 \setlength{\csllabelwidth}{3em}
+\newlength{\cslentryspacingunit} % times entry-spacing
+\setlength{\cslentryspacingunit}{\parskip}
 \newenvironment{CSLReferences}[2] % #1 hanging-ident, #2 entry spacing
  {% don't indent paragraphs
   \setlength{\parindent}{0pt}
   % turn on hanging indent if param 1 is 1
-  \ifodd #1 \everypar{\setlength{\hangindent}{\cslhangindent}}\ignorespaces\fi
-  % set entry spacing
-  \ifnum #2 > 0
-  \setlength{\parskip}{#2\baselineskip}
+  \ifodd #1
+  \let\oldpar\par
+  \def\par{\hangindent=\cslhangindent\oldpar}
   \fi
+  % set entry spacing
+  \setlength{\parskip}{#2\cslentryspacingunit}
  }%
  {}
 \usepackage{calc}
@@ -68,6 +68,9 @@
 \newcommand{\CSLLeftMargin}[1]{\parbox[t]{\csllabelwidth}{#1}}
 \newcommand{\CSLRightInline}[1]{\parbox[t]{\linewidth - \csllabelwidth}{#1}\break}
 \newcommand{\CSLIndent}[1]{\hspace{\cslhangindent}#1}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
@@ -109,14 +112,12 @@ data (VRF-AD)} can be described with two functions:
 \begin{itemize}
 \tightlist
 \item
-  \(Sign(sk,msg,ad) \mapsto \sigma\) : from a secret key \(sk\), an
-  input \(msg\), and additional data \(ad\), and returns a signature
-  \(\sigma\).
+  \(Sign(sk,msg,ad) \mapsto \pi\) : from a secret key \(sk\), an input
+  \(msg\), and additional data \(ad\), and returns a signature \(\pi\).
 \item
-  \(Verify(pk,msg,ad,\sigma) \mapsto (out|prep)\) : for a public key
+  \(Verify(pk,msg,ad,\pi) \mapsto (out|prep)\) : for a public key
   \(pk\), an input \(msg\), additional data \(ad\), and VRF signature
-  \(\sigma\) returns either an output \(out\) or else a failure
-  \(perp\).
+  \(\pi\) returns either an output \(out\) or else a failure \(perp\).
 \end{itemize}
 
 \textbf{Definition}: For an elliptic curve \(E\) defined over finite
@@ -276,7 +277,7 @@ guidelines and naming conventions.
 \item
   \(O\): VRF Output \(\in \langle G \rangle\)
 \item
-  \(\sigma\): \emph{Schnorr-like} proof
+  \(\pi\): \emph{Schnorr-like} proof
   \(\in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
 \end{itemize}
 
@@ -296,9 +297,9 @@ guidelines and naming conventions.
 \item
   \(s \leftarrow (k + c \cdot x)\)
 \item
-  \(\sigma \leftarrow (c, s)\)
+  \(\pi \leftarrow (c, s)\)
 \item
-  \textbf{return} \((O, \sigma)\)
+  \textbf{return} \((O, \pi)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -329,7 +330,7 @@ guidelines and naming conventions.
 \item
   \(O\): VRF Output \(\in \langle G \rangle\)
 \item
-  \(\sigma\): As defined for \(Sign\) output.
+  \(\pi\): As defined for \(Sign\) output.
 \end{itemize}
 
 \textbf{Outputs}:
@@ -346,7 +347,7 @@ guidelines and naming conventions.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((c, s) \leftarrow \sigma\)
+  \((c, s) \leftarrow \pi\)
 \item
   \(U \leftarrow s \cdot K - c \cdot Y\)
 \item
@@ -434,7 +435,7 @@ specification for IETF VRF.
 \item
   \(O\): VRF \(Output \in \langle G \rangle\)
 \item
-  \(\sigma\): Pedersen proof
+  \(\pi\): Pedersen proof
   \(\in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\)
 \end{itemize}
 
@@ -460,9 +461,9 @@ specification for IETF VRF.
 \item
   \(s_b \leftarrow k_b + c \cdot b\)
 \item
-  \(\sigma \leftarrow (\bar{Y}, R, O_k, s, s_b)\)
+  \(\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)\)
 \item
-  \textbf{return} \((O, \sigma)\)
+  \textbf{return} \((O, \pi)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -489,7 +490,7 @@ specification for IETF VRF.
 \item
   \(ad\): Additional data octet-string
 \item
-  \(\sigma\): Pedersen proof as defined for \(Sign\).
+  \(\pi\): Pedersen proof as defined for \(Sign\).
 \end{itemize}
 
 \textbf{Output}:
@@ -506,7 +507,7 @@ specification for IETF VRF.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \sigma\)
+  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi\)
 \item
   \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
 \item
@@ -615,9 +616,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(O\): VRF Output \(\in \langle G \rangle\).
 \item
-  \(\sigma_p\): Pedersen proof as specified in {[}Pedersen VRF{]}.
+  \(\pi_p\): Pedersen proof as specified in {[}Pedersen VRF{]}.
 \item
-  \(\sigma_r\): Ring proof as specified in
+  \(\pi_r\): Ring proof as specified in
   \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
 \end{itemize}
 
@@ -627,9 +628,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((O, \sigma_p) \leftarrow Pedersen.Sign(x, I, ad)\)
+  \((O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)\)
 \item
-  \(\sigma_r \leftarrow Ring.Prove(P, ...)\) (TODO)
+  \(\pi_r \leftarrow Ring.Prove(P, ...)\) (TODO)
 \end{enumerate}
 
 \hypertarget{verify-2}{%
@@ -648,9 +649,9 @@ TODO: - SRS for zk-SNARK definition - All the details
 \item
   \(ad\): Additional data octet-string
 \item
-  \(\sigma_p\): Pedersen proof as defined in Pedersen VRF.
+  \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
 \item
-  \(\sigma_r\): Ring proof as defined in
+  \(\pi_r\): Ring proof as defined in
   \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
 \end{itemize}
 
@@ -670,7 +671,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \def\labelenumi{\arabic{enumi}.}
   \tightlist
   \item
-    \(r = Pedersen.Verify(I, O, ad, \sigma_p)\)
+    \(r = Pedersen.Verify(I, O, ad, \pi_p)\)
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -686,7 +687,7 @@ TODO: - SRS for zk-SNARK definition - All the details
   \setcounter{enumi}{2}
   \tightlist
   \item
-    \(r = Ring.Verify(V, \sigma_r, ...)\) (TODO)
+    \(r = Ring.Verify(V, \pi_r, ...)\) (TODO)
   \end{enumerate}
 \item
   \begin{enumerate}
@@ -712,30 +713,35 @@ TODO: - SRS for zk-SNARK definition - All the details
 
 \hypertarget{refs}{}
 \begin{CSLReferences}{0}{0}
-\leavevmode\hypertarget{ref-RFC9381}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-RFC9381}{}}%
 \CSLLeftMargin{1. }
-\CSLRightInline{Internet Engineering Task Force \emph{{Verifiable Random
-Functions}}; {RFC Editor}, 2023;}
+\CSLRightInline{Internet Engineering Task Force
+\emph{\href{https://datatracker.ietf.org/doc/rfc9381}{{Verifiable Random
+Functions}}}; {RFC Editor}, 2023;}
 
-\leavevmode\hypertarget{ref-BCHSV23}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-BCHSV23}{}}%
 \CSLLeftMargin{2. }
 \CSLRightInline{Burdges, J.; Ciobotaru, O.; Alper, H.K.; Stewart, A.;
-Vasilyev, S. Ring Verifiable Random Functions and Zero-Knowledge
-Continuations 2023.}
+Vasilyev, S. \href{https://eprint.iacr.org/2023/002}{Ring Verifiable
+Random Functions and Zero-Knowledge Continuations} 2023.}
 
-\leavevmode\hypertarget{ref-Vasilyev}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-Vasilyev}{}}%
 \CSLLeftMargin{3. }
-\CSLRightInline{Vasilyev, S. Ring Proof Technical Specification 2024.}
+\CSLRightInline{Vasilyev, S.
+\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Ring Proof Technical
+Specification} 2024.}
 
-\leavevmode\hypertarget{ref-MSZ21}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-MSZ21}{}}%
 \CSLLeftMargin{4. }
-\CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z. Bandersnatch: A Fast
-Elliptic Curve Built over the Bls12-381 Scalar Field 2021.}
+\CSLRightInline{Masson, S.; Sanso, A.; Zhang, Z.
+\href{https://eprint.iacr.org/2021/1152}{Bandersnatch: A Fast Elliptic
+Curve Built over the Bls12-381 Scalar Field} 2021.}
 
-\leavevmode\hypertarget{ref-RFC9380}{}%
+\leavevmode\vadjust pre{\hypertarget{ref-RFC9380}{}}%
 \CSLLeftMargin{5. }
-\CSLRightInline{Internet Engineering Task Force \emph{{Hashing to
-Elliptic Curves}}; {RFC Editor}, 2023;}
+\CSLRightInline{Internet Engineering Task Force
+\emph{\href{https://datatracker.ietf.org/doc/rfc9380}{{Hashing to
+Elliptic Curves}}}; {RFC Editor}, 2023;}
 
 \end{CSLReferences}
 
