@@ -30,10 +30,10 @@ BLS12-381 scalar field.
 **Definition**: A *verifiable random function with additional data (VRF-AD)*
 can be described with two functions:
 
-- $Sign(sk,msg,ad) \mapsto \sigma$ : from a secret key $sk$, an input $msg$,
-  and additional data $ad$, and returns a signature $\sigma$.
-- $Verify(pk,msg,ad,\sigma) \mapsto (out|prep)$ : for a public key $pk$,
-  an input $msg$, additional data $ad$, and VRF signature $\sigma$ returns either
+- $Sign(sk,msg,ad) \mapsto \pi$ : from a secret key $sk$, an input $msg$,
+  and additional data $ad$, and returns a signature $\pi$.
+- $Verify(pk,msg,ad,\pi) \mapsto (out|prep)$ : for a public key $pk$,
+  an input $msg$, additional data $ad$, and VRF signature $\pi$ returns either
   an output $out$ or else a failure $perp$.
 
 **Definition**: For an elliptic curve $E$ defined over finite field $\mathbb{F}_p$
@@ -140,7 +140,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 **Outputs**:
 
 - $O$: VRF Output $\in \G$
-- $\sigma$: *Schnorr-like* proof $\in (\F, \F)$
+- $\pi$: *Schnorr-like* proof $\in (\F, \F)$
 
 **Steps**:
 
@@ -149,8 +149,8 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 3. $k \leftarrow nonce(x, I)$
 4. $c \leftarrow challenge(Y, I, O, k \cdot G, k \cdot I, ad)$
 5. $s \leftarrow (k + c \cdot x)$
-6. $\sigma \leftarrow (c, s)$
-7. **return** $(O, \sigma)$
+6. $\pi \leftarrow (c, s)$
+7. **return** $(O, \pi)$
 
 **Externals**:
 
@@ -165,7 +165,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 - $I$: VRF Input $\in \G$
 - $ad$: Additional data octet-string
 - $O$: VRF Output $\in \G$
-- $\sigma$: As defined for $Sign$ output.
+- $\pi$: As defined for $Sign$ output.
 
 **Outputs**:  
 
@@ -173,7 +173,7 @@ following the [RFC9381] section 5.5 guidelines and naming conventions.
 
 **Steps**:
 
-1. $(c, s) \leftarrow \sigma$
+1. $(c, s) \leftarrow \pi$
 2. $U \leftarrow s \cdot K - c \cdot Y$
 3. $V \leftarrow s \cdot H - c \cdot O$
 4. $c' \leftarrow challenge(Y, I, O, U, V, ad)$
@@ -226,7 +226,7 @@ much as possible to the [Bandersnatch Cipher Suite] specification for IETF VRF.
 **Output**:
 
 - $O$: VRF $Output \in \G$
-- $\sigma$: Pedersen proof $\in (\G, \G, \G, \F, \F)$
+- $\pi$: Pedersen proof $\in (\G, \G, \G, \F, \F)$
 
 **Steps**:
 
@@ -238,8 +238,8 @@ much as possible to the [Bandersnatch Cipher Suite] specification for IETF VRF.
 6. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
 7. $s \leftarrow k + c \cdot x$
 8. $s_b \leftarrow k_b + c \cdot b$
-9. $\sigma \leftarrow (\bar{Y}, R, O_k, s, s_b)$
-10. **return** $(O, \sigma)$
+9. $\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)$
+10. **return** $(O, \pi)$
 
 **Externals**:
 
@@ -253,7 +253,7 @@ much as possible to the [Bandersnatch Cipher Suite] specification for IETF VRF.
 - $I$: VRF Input $\in \G$.
 - $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
-- $\sigma$: Pedersen proof as defined for $Sign$.
+- $\pi$: Pedersen proof as defined for $Sign$.
 
 **Output**:  
 
@@ -261,7 +261,7 @@ much as possible to the [Bandersnatch Cipher Suite] specification for IETF VRF.
 
 **Steps**:
 
-1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \sigma$
+1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi$
 2. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
 3. $z_1 \leftarrow O_k + c \cdot O - I \cdot s$
 4. **if** $z_1 \neq O$ **then** **return** False
@@ -325,13 +325,13 @@ TODO:
 **Output**:
 
 - $O$: VRF Output $\in \G$.
-- $\sigma_p$: Pedersen proof as specified in [Pedersen VRF].
-- $\sigma_r$: Ring proof as specified in [Vasilyev]
+- $\pi_p$: Pedersen proof as specified in [Pedersen VRF].
+- $\pi_r$: Ring proof as specified in [Vasilyev]
 
 **Steps**:
 
-1. $(O, \sigma_p) \leftarrow Pedersen.Sign(x, I, ad)$
-2. $\sigma_r \leftarrow Ring.Prove(P, ...)$ (TODO)
+1. $(O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)$
+2. $\pi_r \leftarrow Ring.Prove(P, ...)$ (TODO)
 
 ## 5.3. Verify
 
@@ -341,8 +341,8 @@ TODO:
 - $I$: VRF Input $\in \G$.
 - $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
-- $\sigma_p$: Pedersen proof as defined in Pedersen VRF.
-- $\sigma_r$: Ring proof as defined in [Vasilyev]
+- $\pi_p$: Pedersen proof as defined in Pedersen VRF.
+- $\pi_r$: Ring proof as defined in [Vasilyev]
 
 **Output**:  
 
@@ -350,9 +350,9 @@ TODO:
 
 **Steps**:
 
-- 1. $r = Pedersen.Verify(I, O, ad, \sigma_p)$
+- 1. $r = Pedersen.Verify(I, O, ad, \pi_p)$
 - 2. **if** $r \neq True$ **return** False
-- 3. $r = Ring.Verify(V, \sigma_r, ...)$ (TODO)
+- 3. $r = Ring.Verify(V, \pi_r, ...)$ (TODO)
 - 4. **if** $r \neq True$ **return** False
 - 4. **return** True
 
