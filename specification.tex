@@ -227,8 +227,8 @@ guidelines defined in section 5.5 of
   \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}, with
   \texttt{h2c\_suite\_ID\_string} =
   \texttt{"Bandersnatch\_XMD:SHA-512\_ELL2\_RO\_"} and domain separation
-  tag
-  \texttt{DST\ =\ "ECVRF\_"\ \textbar{}\textbar{}\ h2c\_suite\_ID\_string\ \textbar{}\textbar{}\ suite\_string}.
+  tag \texttt{DST\ =\ "ECVRF\_"} \(\Vert\)
+  \texttt{h2c\_suite\_ID\_string} \(\Vert\) \texttt{suite\_string}.
 \end{itemize}
 
 \hypertarget{prove}{%
@@ -314,7 +314,7 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise.
+  True if proof is valid, False otherwise
 \end{itemize}
 
 \textbf{Steps}:
@@ -343,11 +343,6 @@ guidelines defined in section 5.5 of
 \item
   \(challenge\): as defined for \(Sign\)
 \end{itemize}
-
-\hypertarget{validity-argument}{%
-\subsubsection{2.3.1. Validity Argument}\label{validity-argument}}
-
-TODO
 
 \hypertarget{challenge}{%
 \subsection{2.4. Challenge}\label{challenge}}
@@ -512,7 +507,7 @@ described in section 2.1 of this specification.
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise.
+  True if proof is valid, False otherwise
 \end{itemize}
 
 \textbf{Steps}:
@@ -533,11 +528,6 @@ described in section 2.1 of this specification.
 \item
   \textbf{return} True
 \end{enumerate}
-
-\hypertarget{validity-argument-1}{%
-\subsubsection{3.3.1. Validity Argument}\label{validity-argument-1}}
-
-TODO
 
 \hypertarget{ring-vrf}{%
 \section{4. Ring VRF}\label{ring-vrf}}
@@ -640,7 +630,7 @@ Ring proof configuration:
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise.
+  True if proof is valid, False otherwise
 \end{itemize}
 
 \textbf{Steps}:

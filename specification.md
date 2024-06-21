@@ -115,7 +115,7 @@ section 5.5 of [RFC-9381].
 * The `ECVRF_encode_to_curve` function uses *Elligator2* method described in
   section 6.8.2 of [RFC-9380] and is described in section 5.4.1.2 of
   [RFC-9381], with `h2c_suite_ID_string` = `"Bandersnatch_XMD:SHA-512_ELL2_RO_"`
-  and domain separation tag `DST = "ECVRF_" || h2c_suite_ID_string || suite_string`.
+  and domain separation tag `DST = "ECVRF_"` $\Vert$ `h2c_suite_ID_string` $\Vert$ `suite_string`.
 
 ## 2.2. Prove
 
@@ -157,7 +157,7 @@ section 5.5 of [RFC-9381].
 
 **Output**:  
 
-- True if proof is valid, False otherwise.  
+- True if proof is valid, False otherwise
 
 **Steps**:
 
@@ -172,9 +172,6 @@ section 5.5 of [RFC-9381].
 
 - $challenge$: as defined for $Sign$
 
-### 2.3.1. Validity Argument
-
-TODO
 
 ## 2.4. Challenge
 
@@ -271,7 +268,7 @@ section 2.1 of this specification.
 
 **Output**:  
 
-- True if proof is valid, False otherwise.  
+- True if proof is valid, False otherwise
 
 **Steps**:
 
@@ -281,9 +278,6 @@ section 2.1 of this specification.
 4. **if** $R + c \cdot \bar{Y} \neq s \cdot G - s_b \cdot B$ **then** **return** False
 5. **return** True
 
-### 3.3.1. Validity Argument
-
-TODO
 
 # 4. Ring VRF
 
@@ -335,7 +329,7 @@ Ring proof configuration:
 
 **Output**:  
 
-- True if proof is valid, False otherwise.
+- True if proof is valid, False otherwise
 
 **Steps**:
 
