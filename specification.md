@@ -80,8 +80,8 @@ section 5.5 of [RFC-9381].
   [MSZ21]. For this group, `fLen` = `qLen` = $32$ and `cofactor` = $4$.
 
 - The prime subgroup generator $G \in \G$ is defined as follows:
-  $$_{G.x = 0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}$$
-  $$_{G.y = 0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}$$
+  $$_{G.x = \texttt{0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}}$$
+  $$_{G.y = \texttt{0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}}$$
 
 - `cLen` = 32.
 
@@ -125,7 +125,7 @@ section 5.5 of [RFC-9381].
 - $I \in \G$: VRF input point
 - $ad$: Additional data octet-string
 
-**Outputs**:
+**Output**:
 
 - $O \in \G$: VRF output point
 - $\pi \in (\F, \F)$: Schnorr-like proof
@@ -147,7 +147,7 @@ section 5.5 of [RFC-9381].
 
 ## 2.3. Verify
 
-**Inputs**:  
+**Input**:  
 
 - $Y \in \G$: Public key
 - $I \in \G$: VRF input point
@@ -155,7 +155,7 @@ section 5.5 of [RFC-9381].
 - $O \in \G$: VRF output point
 - $\pi \in (\F, \F)$: Schnorr-like proof
 
-**Outputs**:  
+**Output**:  
 
 - True if proof is valid, False otherwise.  
 
@@ -172,7 +172,7 @@ section 5.5 of [RFC-9381].
 
 - $challenge$: as defined for $Sign$
 
-### 2.3.1 Validity Argument
+### 2.3.1. Validity Argument
 
 TODO
 
@@ -221,11 +221,12 @@ generation procedure.
 
 ## 3.1. Configuration
 
-Pedersen VRF is initiated for prime subgroup $\G$ of Bandersnatch elliptic
+Pedersen VRF is configured for prime subgroup $\G$ of Bandersnatch elliptic
 curve $E$ defined in [MSZ21] [@MSZ21] with *blinding base* $B \in \G$ defined
 as follows:
-$$_{B.x = 0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}$$
-$$_{B.y = 0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}$$
+
+$$_{B.x = \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}}$$
+$$_{B.y = \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}}$$
 
 For all the other configurable parameters and external functions we adhere as
 much as possible to the Bandersnatch cipher suite for IETF VRF described in
@@ -233,7 +234,7 @@ section 2.1 of this specification.
 
 ### 3.2. Prove
 
-**Inputs**:
+**Input**:
 
 - $x \in \F$: Secret key
 - $b \in \F$: Secret blinding factor
@@ -248,29 +249,25 @@ section 2.1 of this specification.
 **Steps**:
 
 1. $O \leftarrow x \cdot I$
-2. $(k, k_b) \leftarrow random()$
-3. $\bar{Y} \leftarrow x \cdot G + b \cdot B$
-4. $R \leftarrow k \cdot G + k_b \cdot B$
-5. $O_k \leftarrow k \cdot I$
-6. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
-7. $s \leftarrow k + c \cdot x$
-8. $s_b \leftarrow k_b + c \cdot b$
-9. $\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)$
-10. **return** $(O, \pi)$
-
-**Externals**:
-
-- $challenge$: see [Challenge] section
-- $random$: generates random scalars in $\F$
+2. $k \leftarrow nonce(x, I)$
+3. $k_b \leftarrow nonce(k, I)$
+4. $\bar{Y} \leftarrow x \cdot G + b \cdot B$
+5. $R \leftarrow k \cdot G + k_b \cdot B$
+6. $O_k \leftarrow k \cdot I$
+7. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
+8. $s \leftarrow k + c \cdot x$
+9. $s_b \leftarrow k_b + c \cdot b$
+10. $\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)$
+11. **return** $(O, \pi)$
 
 ## 3.3. Verify  
 
-**Inputs**:  
+**Input**:  
 
-- $I$: VRF Input $\in \G$.
-- $O$: VRF Output $\in \G$.
+- $I \in \G$: VRF input point
 - $ad$: Additional data octet-string
-- $\pi$: Pedersen proof as defined for $Sign$.
+- $O \in \G$: VRF output point
+- $\pi \in (\G, \G, \G, \F, \F)$: Pedersen proof
 
 **Output**:  
 
@@ -280,59 +277,61 @@ section 2.1 of this specification.
 
 1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi$
 2. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
-3. $z_1 \leftarrow O_k + c \cdot O - I \cdot s$
-4. **if** $z_1 \neq 0$ **then** **return** False
-5. $z_2 \leftarrow R + c \cdot \bar{Y} - s \cdot G - s_b \cdot B$
-6. **if** $z_2 \neq 0$ **then** **return** False
-7. **return** True
+3. **if** $O_k + c \cdot O \neq I \cdot s$ **then** **return** False
+4. **if** $R + c \cdot \bar{Y} \neq s \cdot G - s_b \cdot B$ **then** **return** False
+5. **return** True
 
-**Externals**:
+### 3.3.1. Validity Argument
 
-- $challenge$: see [Challenge] section
-
+TODO
 
 # 4. Ring VRF
 
-Anonymized ring VRFs based of [Pedersen VRF] and ...
+Anonymized ring VRF based of [Pedersen VRF] and Ring Proof as proposed by [Vasilyev].
 
-## 4.1. Setup
+## 4.1. Configuration
 
 Setup for plain [Pedersen VRF] applies.
 
-TODO:
-- SRS for zk-SNARK definition
-- All the details
+Ring proof configuration:
 
-## 4.2. Sign
+- KZG PCS uses [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) SRS and a domain of 2048 entries.
+- $G_1$: BLS12-381 $G_1$
+- $G_2$: BLS12-381 $G_2$
+- TODO: ...
 
-**Inputs**:
+## 4.2. Prove
 
-- $x$: Secret key $\in \F$.
-- $P$: Ring prover key
-- $I$: VRF Input $\in \G$.
+**Input**:
+
+- $x \in \F$: Secret key
+- $P \in TODO$: Ring prover
+- $b \in \F$: Secret blinding factor
+- $I \in \G$: VRF input point
 - $ad$: Additional data octet-string
 
 **Output**:
 
-- $O$: VRF Output $\in \G$.
-- $\pi_p$: Pedersen proof as specified in [Pedersen VRF].
-- $\pi_r$: Ring proof as specified in [Vasilyev]
+- $O \in \G$: VRF output point
+- $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
+- $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
 
 **Steps**:
 
-1. $(O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)$
-2. $\pi_r \leftarrow Ring.Prove(P, ...)$ (TODO)
+1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)$
+2. $\pi_r \leftarrow Ring.prove(P, b)$ (TODO)
+3. **return** $(O, \pi_p, \pi_r)$
 
 ## 4.3. Verify
 
-**Inputs**:  
+**Input**:  
 
-- $V$: ring verifier key $\in ?$
-- $I$: VRF Input $\in \G$.
+- $V \in (G_1)^3$: Ring verifier
+- $I \in \G$: VRF input point
 - $O$: VRF Output $\in \G$.
 - $ad$: Additional data octet-string
-- $\pi_p$: Pedersen proof as defined in Pedersen VRF.
-- $\pi_r$: Ring proof as defined in [Vasilyev]
+- $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
+- $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
 
 **Output**:  
 
@@ -340,11 +339,12 @@ TODO:
 
 **Steps**:
 
-- 1. $r = Pedersen.Verify(I, O, ad, \pi_p)$
-- 2. **if** $r \neq True$ **return** False
-- 3. $r = Ring.Verify(V, \pi_r, ...)$ (TODO)
-- 4. **if** $r \neq True$ **return** False
-- 4. **return** True
+1. $rp = Pedersen.verify(I, ad, O, \pi_p)$
+2. **if** $rp \neq True$ **return** False
+3. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p$
+4. $rr = Ring.verify(V, \pi_r, \bar{Y})$
+5. **if** $rr \neq True$ **return** False
+6. **return** True
 
 
 # 5. References

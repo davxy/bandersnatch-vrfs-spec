@@ -180,8 +180,8 @@ guidelines defined in section 5.5 of
 \item
   The prime subgroup generator \(G \in \langle G \rangle\) is defined as
   follows:
-  \[_{G.x = 0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}\]
-  \[_{G.y = 0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}\]
+  \[_{G.x = \texttt{0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}}\]
+  \[_{G.y = \texttt{0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}}\]
 \item
   \texttt{cLen} = 32.
 \item
@@ -246,7 +246,7 @@ guidelines defined in section 5.5 of
   \(ad\): Additional data octet-string
 \end{itemize}
 
-\textbf{Outputs}:
+\textbf{Output}:
 
 \begin{itemize}
 \tightlist
@@ -293,7 +293,7 @@ guidelines defined in section 5.5 of
 \hypertarget{verify}{%
 \subsection{2.3. Verify}\label{verify}}
 
-\textbf{Inputs}:
+\textbf{Input}:
 
 \begin{itemize}
 \tightlist
@@ -309,7 +309,7 @@ guidelines defined in section 5.5 of
   \(\pi \in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\): Schnorr-like proof
 \end{itemize}
 
-\textbf{Outputs}:
+\textbf{Output}:
 
 \begin{itemize}
 \tightlist
@@ -345,7 +345,7 @@ guidelines defined in section 5.5 of
 \end{itemize}
 
 \hypertarget{validity-argument}{%
-\subsubsection{2.3.1 Validity Argument}\label{validity-argument}}
+\subsubsection{2.3.1. Validity Argument}\label{validity-argument}}
 
 TODO
 
@@ -420,12 +420,13 @@ generation procedure.
 \hypertarget{configuration-1}{%
 \subsection{3.1. Configuration}\label{configuration-1}}
 
-Pedersen VRF is initiated for prime subgroup \(\langle G \rangle\) of
+Pedersen VRF is configured for prime subgroup \(\langle G \rangle\) of
 Bandersnatch elliptic curve \(E\) defined in
 \href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
 \emph{blinding base} \(B \in \langle G \rangle\) defined as follows:
-\[_{B.x = 0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}\]
-\[_{B.y = 0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}\]
+
+\[_{B.x = \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}}\]
+\[_{B.y = \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}}\]
 
 For all the other configurable parameters and external functions we
 adhere as much as possible to the Bandersnatch cipher suite for IETF VRF
@@ -434,7 +435,7 @@ described in section 2.1 of this specification.
 \hypertarget{prove-1}{%
 \subsubsection{3.2. Prove}\label{prove-1}}
 
-\textbf{Inputs}:
+\textbf{Input}:
 
 \begin{itemize}
 \tightlist
@@ -467,7 +468,9 @@ described in section 2.1 of this specification.
 \item
   \(O \leftarrow x \cdot I\)
 \item
-  \((k, k_b) \leftarrow random()\)
+  \(k \leftarrow nonce(x, I)\)
+\item
+  \(k_b \leftarrow nonce(k, I)\)
 \item
   \(\bar{Y} \leftarrow x \cdot G + b \cdot B\)
 \item
@@ -486,31 +489,22 @@ described in section 2.1 of this specification.
   \textbf{return} \((O, \pi)\)
 \end{enumerate}
 
-\textbf{Externals}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(challenge\): see {[}Challenge{]} section
-\item
-  \(random\): generates random scalars in \(\mathbb{Z}^*_r\)
-\end{itemize}
-
 \hypertarget{verify-1}{%
 \subsection{3.3. Verify}\label{verify-1}}
 
-\textbf{Inputs}:
+\textbf{Input}:
 
 \begin{itemize}
 \tightlist
 \item
-  \(I\): VRF Input \(\in \langle G \rangle\).
-\item
-  \(O\): VRF Output \(\in \langle G \rangle\).
+  \(I \in \langle G \rangle\): VRF input point
 \item
   \(ad\): Additional data octet-string
 \item
-  \(\pi\): Pedersen proof as defined for \(Sign\).
+  \(O \in \langle G \rangle\): VRF output point
+\item
+  \(\pi \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  Pedersen proof
 \end{itemize}
 
 \textbf{Output}:
@@ -531,50 +525,62 @@ described in section 2.1 of this specification.
 \item
   \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
 \item
-  \(z_1 \leftarrow O_k + c \cdot O - I \cdot s\)
+  \textbf{if} \(O_k + c \cdot O \neq I \cdot s\) \textbf{then}
+  \textbf{return} False
 \item
-  \textbf{if} \(z_1 \neq 0\) \textbf{then} \textbf{return} False
-\item
-  \(z_2 \leftarrow R + c \cdot \bar{Y} - s \cdot G - s_b \cdot B\)
-\item
-  \textbf{if} \(z_2 \neq 0\) \textbf{then} \textbf{return} False
+  \textbf{if} \(R + c \cdot \bar{Y} \neq s \cdot G - s_b \cdot B\)
+  \textbf{then} \textbf{return} False
 \item
   \textbf{return} True
 \end{enumerate}
 
-\textbf{Externals}:
+\hypertarget{validity-argument-1}{%
+\subsubsection{3.3.1. Validity Argument}\label{validity-argument-1}}
 
-\begin{itemize}
-\tightlist
-\item
-  \(challenge\): see {[}Challenge{]} section
-\end{itemize}
+TODO
 
 \hypertarget{ring-vrf}{%
 \section{4. Ring VRF}\label{ring-vrf}}
 
-Anonymized ring VRFs based of {[}Pedersen VRF{]} and \ldots{}
+Anonymized ring VRF based of {[}Pedersen VRF{]} and Ring Proof as
+proposed by \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}.
 
-\hypertarget{setup}{%
-\subsection{4.1. Setup}\label{setup}}
+\hypertarget{configuration-2}{%
+\subsection{4.1. Configuration}\label{configuration-2}}
 
 Setup for plain {[}Pedersen VRF{]} applies.
 
-TODO: - SRS for zk-SNARK definition - All the details
-
-\hypertarget{sign}{%
-\subsection{4.2. Sign}\label{sign}}
-
-\textbf{Inputs}:
+Ring proof configuration:
 
 \begin{itemize}
 \tightlist
 \item
-  \(x\): Secret key \(\in \mathbb{Z}^*_r\).
+  KZG PCS uses
+  \href{https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony}{Zcash}
+  SRS and a domain of 2048 entries.
 \item
-  \(P\): Ring prover key
+  \(G_1\): BLS12-381 \(G_1\)
 \item
-  \(I\): VRF Input \(\in \langle G \rangle\).
+  \(G_2\): BLS12-381 \(G_2\)
+\item
+  TODO: \ldots{}
+\end{itemize}
+
+\hypertarget{prove-2}{%
+\subsection{4.2. Prove}\label{prove-2}}
+
+\textbf{Input}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(x \in \mathbb{Z}^*_r\): Secret key
+\item
+  \(P \in TODO\): Ring prover
+\item
+  \(b \in \mathbb{Z}^*_r\): Secret blinding factor
+\item
+  \(I \in \langle G \rangle\): VRF input point
 \item
   \(ad\): Additional data octet-string
 \end{itemize}
@@ -584,12 +590,13 @@ TODO: - SRS for zk-SNARK definition - All the details
 \begin{itemize}
 \tightlist
 \item
-  \(O\): VRF Output \(\in \langle G \rangle\).
+  \(O \in \langle G \rangle\): VRF output point
 \item
-  \(\pi_p\): Pedersen proof as specified in {[}Pedersen VRF{]}.
+  \(\pi_p \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  Pedersen proof
 \item
-  \(\pi_r\): Ring proof as specified in
-  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
+  \(\pi_r \in ((G_1)^4, (\mathbb{Z}^*_r)^7, G_1, \mathbb{Z}^*_r, G_1, G_1)\):
+  Ring proof
 \end{itemize}
 
 \textbf{Steps}:
@@ -598,31 +605,34 @@ TODO: - SRS for zk-SNARK definition - All the details
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((O, \pi_p) \leftarrow Pedersen.Sign(x, I, ad)\)
+  \((O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)\)
 \item
-  \(\pi_r \leftarrow Ring.Prove(P, ...)\) (TODO)
+  \(\pi_r \leftarrow Ring.prove(P, b)\) (TODO)
+\item
+  \textbf{return} \((O, \pi_p, \pi_r)\)
 \end{enumerate}
 
 \hypertarget{verify-2}{%
 \subsection{4.3. Verify}\label{verify-2}}
 
-\textbf{Inputs}:
+\textbf{Input}:
 
 \begin{itemize}
 \tightlist
 \item
-  \(V\): ring verifier key \(\in ?\)
+  \(V \in (G_1)^3\): Ring verifier
 \item
-  \(I\): VRF Input \(\in \langle G \rangle\).
+  \(I \in \langle G \rangle\): VRF input point
 \item
   \(O\): VRF Output \(\in \langle G \rangle\).
 \item
   \(ad\): Additional data octet-string
 \item
-  \(\pi_p\): Pedersen proof as defined in Pedersen VRF.
+  \(\pi_p \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  Pedersen proof
 \item
-  \(\pi_r\): Ring proof as defined in
-  \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}
+  \(\pi_r \in ((G_1)^4, (\mathbb{Z}^*_r)^7, G_1, \mathbb{Z}^*_r, G_1, G_1)\):
+  Ring proof
 \end{itemize}
 
 \textbf{Output}:
@@ -635,47 +645,22 @@ TODO: - SRS for zk-SNARK definition - All the details
 
 \textbf{Steps}:
 
-\begin{itemize}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
 \item
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi}.}
-  \tightlist
-  \item
-    \(r = Pedersen.Verify(I, O, ad, \pi_p)\)
-  \end{enumerate}
+  \(rp = Pedersen.verify(I, ad, O, \pi_p)\)
 \item
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi}.}
-  \setcounter{enumi}{1}
-  \tightlist
-  \item
-    \textbf{if} \(r \neq True\) \textbf{return} False
-  \end{enumerate}
+  \textbf{if} \(rp \neq True\) \textbf{return} False
 \item
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi}.}
-  \setcounter{enumi}{2}
-  \tightlist
-  \item
-    \(r = Ring.Verify(V, \pi_r, ...)\) (TODO)
-  \end{enumerate}
+  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p\)
 \item
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi}.}
-  \setcounter{enumi}{3}
-  \tightlist
-  \item
-    \textbf{if} \(r \neq True\) \textbf{return} False
-  \end{enumerate}
+  \(rr = Ring.verify(V, \pi_r, \bar{Y})\)
 \item
-  \begin{enumerate}
-  \def\labelenumi{\arabic{enumi}.}
-  \setcounter{enumi}{3}
-  \tightlist
-  \item
-    \textbf{return} True
-  \end{enumerate}
-\end{itemize}
+  \textbf{if} \(rr \neq True\) \textbf{return} False
+\item
+  \textbf{return} True
+\end{enumerate}
 
 \hypertarget{references}{%
 \section*{5. References}\label{references}}
