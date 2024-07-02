@@ -150,6 +150,7 @@ impl Verifier {
         let result = Public::verify(input, output, aux_data, &signature.proof, &verifier).is_ok();
         if !result {
             println!("Ring signature verification failure");
+            return result;
         }
         println!("Ring signature verified");
 
@@ -182,6 +183,7 @@ impl Verifier {
             .is_ok();
         if !result {
             println!("Ring signature verification failure");
+            return result;
         }
         println!("Ietf signature verified");
 
