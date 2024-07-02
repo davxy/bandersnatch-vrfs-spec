@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 22 June 2024 - Draft 7
+date: 02 Jul 2024 - Draft 8
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -56,6 +56,8 @@ A point in $\G$ generated from VRF input point as: $Output \leftarrow sk \cdot I
 
 A fixed length octet-string generated from VRF output point using the
 proof-to-hash procedure defined in section 5.2 of [RFC-9381].
+
+The first 32 bytes of the hash output are taken.
 
 ## 1.5 Additional Data
 

@@ -1,0 +1,7 @@
+[package]
+name = "ark-ec-vrfs-bandersnatch-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", default-features = false, features = ["bandersnatch", "ring", "test-vectors"] }
