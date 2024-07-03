@@ -199,6 +199,16 @@ impl Verifier {
     }
 }
 
+macro_rules! measure_time {
+    ($func_name:expr, $func_call:expr) => {{
+        let start = std::time::Instant::now();
+        let result = $func_call;
+        let duration = start.elapsed();
+        println!("* Time taken by {}: {:?}", $func_name, duration);
+        result
+    }};
+}
+
 fn main() {
     let ring_set: Vec<_> = (0..RING_SIZE)
         .map(|i| Secret::from_seed(&i.to_le_bytes()).public())
@@ -215,12 +225,16 @@ fn main() {
     let aux_data = b"bar";
 
     // Prover signs some data.
-    let ring_signature = prover.ring_vrf_sign(vrf_input_data, aux_data);
+    let ring_signature = measure_time! {
+        "ring-vrf-sign",
+        prover.ring_vrf_sign(vrf_input_data, aux_data)
+    };
 
     // Verifier checks it without knowing who is the signer.
-    let ring_vrf_output = verifier
-        .ring_vrf_verify(vrf_input_data, aux_data, &ring_signature)
-        .unwrap();
+    let ring_vrf_output = measure_time! {
+        "ring-vrf-verify",
+        verifier.ring_vrf_verify(vrf_input_data, aux_data, &ring_signature).unwrap()
+    };
 
     //--- Non anonymous VRF
 
@@ -228,17 +242,16 @@ fn main() {
 
     // Prover signs the same vrf-input data (we want the output to match)
     // But different aux data.
-    let ietf_signature = prover.ietf_vrf_sign(vrf_input_data, other_aux_data);
+    let ietf_signature = measure_time! {
+        "ietf-vrf-sign",
+        prover.ietf_vrf_sign(vrf_input_data, other_aux_data)
+    };
 
     // Verifier checks the signature knowing the signer identity.
-    let ietf_vrf_output = verifier
-        .ietf_vrf_verify(
-            vrf_input_data,
-            other_aux_data,
-            &ietf_signature,
-            prover_key_index,
-        )
-        .unwrap();
+    let ietf_vrf_output = measure_time! {
+        "ietf-vrf-verify",
+        verifier.ietf_vrf_verify(vrf_input_data, other_aux_data, &ietf_signature, prover_key_index).unwrap()
+    };
 
     // Must match
     assert_eq!(ring_vrf_output, ietf_vrf_output);
