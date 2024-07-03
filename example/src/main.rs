@@ -26,9 +26,8 @@ struct RingVrfSignature {
 // "Static" ring context data
 fn ring_context() -> &'static RingContext {
     use std::sync::OnceLock;
-    const RING_DOMAIN_SIZE: usize = 1023;
     static RING_CTX: OnceLock<RingContext> = OnceLock::new();
-    RING_CTX.get_or_init(|| RingContext::from_seed(RING_DOMAIN_SIZE, [0; 32]))
+    RING_CTX.get_or_init(|| RingContext::from_seed(RING_SIZE, [0; 32]))
 }
 
 // Construct VRF Input Point from arbitrary data (section 1.2)
@@ -120,12 +119,14 @@ impl Verifier {
     /// Anonymous VRF signature verification.
     ///
     /// Used for tickets verification.
+    ///
+    /// On success returns the VRF output hash.
     pub fn ring_vrf_verify(
         &self,
         vrf_input_data: &[u8],
         aux_data: &[u8],
         signature: &[u8],
-    ) -> bool {
+    ) -> Result<[u8; 32], ()> {
         use ark_ec_vrfs::ring::prelude::fflonk::pcs::PcsParams;
         use ark_ec_vrfs::ring::Verifier as _;
         use bandersnatch::VerifierKey;
@@ -147,29 +148,31 @@ impl Verifier {
             ring_ctx.pcs_params.raw_vk(),
         );
         let verifier = ring_ctx.verifier(verifier_key);
-        let result = Public::verify(input, output, aux_data, &signature.proof, &verifier).is_ok();
-        if !result {
+        if Public::verify(input, output, aux_data, &signature.proof, &verifier).is_err() {
             println!("Ring signature verification failure");
-            return result;
+            return Err(());
         }
         println!("Ring signature verified");
 
-        // This truncated hash is the actual value used as ticket-id/score
-        println!(" vrf-output-hash: {}", hex::encode(&output.hash()[..32]));
-        result
+        // This truncated hash is the actual value used as ticket-id/score in JAM
+        let vrf_output_hash: [u8; 32] = output.hash()[..32].try_into().unwrap();
+        println!(" vrf-output-hash: {}", hex::encode(vrf_output_hash));
+        Ok(vrf_output_hash)
     }
 
     /// Non-Anonymous VRF signature verification.
     ///
     /// Used for ticket claim verification during block import.
     /// Not used with Safrole test vectors.
+    ///
+    /// On success returns the VRF output hash.
     pub fn ietf_vrf_verify(
         &self,
         vrf_input_data: &[u8],
         aux_data: &[u8],
         signature: &[u8],
         signer_key_index: usize,
-    ) -> bool {
+    ) -> Result<[u8; 32], ()> {
         use ark_ec_vrfs::ietf::Verifier as _;
 
         let signature = IetfVrfSignature::deserialize_compressed(signature).unwrap();
@@ -178,20 +181,21 @@ impl Verifier {
         let output = signature.output;
 
         let public = &self.ring[signer_key_index];
-        let result = public
+        if public
             .verify(input, output, aux_data, &signature.proof)
-            .is_ok();
-        if !result {
+            .is_err()
+        {
             println!("Ring signature verification failure");
-            return result;
+            return Err(());
         }
         println!("Ietf signature verified");
 
         // This is the actual value used as ticket-id/score
         // NOTE: as far as vrf_input_data is the same, this matches the one produced
         // using the ring-vrf (regardless of aux_data).
-        println!(" vrf-output-hash: {}", hex::encode(&output.hash()[..32]));
-        result
+        let vrf_output_hash: [u8; 32] = output.hash()[..32].try_into().unwrap();
+        println!(" vrf-output-hash: {}", hex::encode(vrf_output_hash));
+        Ok(vrf_output_hash)
     }
 }
 
@@ -214,8 +218,9 @@ fn main() {
     let ring_signature = prover.ring_vrf_sign(vrf_input_data, aux_data);
 
     // Verifier checks it without knowing who is the signer.
-    let res = verifier.ring_vrf_verify(vrf_input_data, aux_data, &ring_signature);
-    assert!(res);
+    let ring_vrf_output = verifier
+        .ring_vrf_verify(vrf_input_data, aux_data, &ring_signature)
+        .unwrap();
 
     //--- Non anonymous VRF
 
@@ -226,11 +231,15 @@ fn main() {
     let ietf_signature = prover.ietf_vrf_sign(vrf_input_data, other_aux_data);
 
     // Verifier checks the signature knowing the signer identity.
-    let res = verifier.ietf_vrf_verify(
-        vrf_input_data,
-        other_aux_data,
-        &ietf_signature,
-        prover_key_index,
-    );
-    assert!(res);
+    let ietf_vrf_output = verifier
+        .ietf_vrf_verify(
+            vrf_input_data,
+            other_aux_data,
+            &ietf_signature,
+            prover_key_index,
+        )
+        .unwrap();
+
+    // Must match
+    assert_eq!(ring_vrf_output, ietf_vrf_output);
 }
