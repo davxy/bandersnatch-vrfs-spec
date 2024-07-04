@@ -27,7 +27,18 @@ struct RingVrfSignature {
 fn ring_context() -> &'static RingContext {
     use std::sync::OnceLock;
     static RING_CTX: OnceLock<RingContext> = OnceLock::new();
-    RING_CTX.get_or_init(|| RingContext::from_seed(RING_SIZE, [0; 32]))
+    RING_CTX.get_or_init(|| {
+        use bandersnatch::PcsParams;
+        use std::{fs::File, io::Read};
+        let manifest_dir =
+            std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not set");
+        let filename = format!("{}/data/zcash-srs-2-11-uncompressed.bin", manifest_dir);
+        let mut file = File::open(filename).unwrap();
+        let mut buf = Vec::new();
+        file.read_to_end(&mut buf).unwrap();
+        let pcs_params = PcsParams::deserialize_uncompressed_unchecked(&mut &buf[..]).unwrap();
+        RingContext::from_srs(pcs_params, RING_SIZE).unwrap()
+    })
 }
 
 // Construct VRF Input Point from arbitrary data (section 1.2)
