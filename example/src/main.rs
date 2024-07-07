@@ -37,7 +37,7 @@ fn ring_context() -> &'static RingContext {
         let mut buf = Vec::new();
         file.read_to_end(&mut buf).unwrap();
         let pcs_params = PcsParams::deserialize_uncompressed_unchecked(&mut &buf[..]).unwrap();
-        RingContext::from_srs(pcs_params, RING_SIZE).unwrap()
+        RingContext::from_srs(RING_SIZE, pcs_params).unwrap()
     })
 }
 
