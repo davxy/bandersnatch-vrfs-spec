@@ -93,7 +93,7 @@ section 5.5 of [RFC-9381].
 
 - `encode_to_curve_salt` = `pk_string` (i.e. `point_to_string(pk)`).
 
-- The `ECVRF_nonce_generation` function is specified in section 5.4.2.1 of [RFC-9381].
+- The `ECVRF_nonce_generation` function is specified in section 5.4.2.2 of [RFC-9381].
 
 - The `int_to_string` function encodes into the 32 bytes little endian representation.
  
@@ -144,7 +144,7 @@ section 5.5 of [RFC-9381].
 
 **Externals**:
 
-- $nonce$: refer to section 5.4.2.1 of [RFC-9381].
+- $nonce$: refer to section 5.4.2.2 of [RFC-9381].
 - $challenge$: refer to section 5.4.3 of [RFC-9381] and section 2.4 of this specification.
 
 ## 2.3. Verify
