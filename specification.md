@@ -105,7 +105,7 @@ section 5.5 of [RFC-9381].
   and the most significant bit of the last octet is used to keep track of $x$ sign.
   This implies that `ptLen = flen = 32`.
 
-- The `string_to_point` function converts an octet-string to a point on $E$.
+- The `string_to_point` function converts an octet-string to a point on $\G$.
   The string most significant bit is removed to recover the $x$ coordinate
   as function of $y$, which is first decoded from the rest of the string
   using `int_to_string` procedure. This function MUST outputs "INVALID" if the
