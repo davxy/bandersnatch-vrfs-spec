@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 02 Jul 2024 - Draft 8
+date: 10 Jul 2024 - Draft 9
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -249,7 +249,7 @@ section 2.1 of this specification.
 
 1. $O \leftarrow x \cdot I$
 2. $k \leftarrow nonce(x, I)$
-3. $k_b \leftarrow nonce(k, I)$
+3. $k_b \leftarrow nonce(b, I)$
 4. $\bar{Y} \leftarrow x \cdot G + b \cdot B$
 5. $R \leftarrow k \cdot G + k_b \cdot B$
 6. $O_k \leftarrow k \cdot I$

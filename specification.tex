@@ -74,7 +74,7 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{02 Jul 2024 - Draft 8}
+\date{10 Jul 2024 - Draft 9}
 
 \begin{document}
 \maketitle
@@ -212,11 +212,12 @@ guidelines defined in section 5.5 of
   of \(x\) sign. This implies that \texttt{ptLen\ =\ flen\ =\ 32}.
 \item
   The \texttt{string\_to\_point} function converts an octet-string to a
-  point on \(E\). The string most significant bit is removed to recover
-  the \(x\) coordinate as function of \(y\), which is first decoded from
-  the rest of the string using \texttt{int\_to\_string} procedure. This
-  function MUST outputs ``INVALID'' if the octet-string does not decode
-  to a point on the prime subgroup \(\langle G \rangle\).
+  point on \(\langle G \rangle\). The string most significant bit is
+  removed to recover the \(x\) coordinate as function of \(y\), which is
+  first decoded from the rest of the string using
+  \texttt{int\_to\_string} procedure. This function MUST outputs
+  ``INVALID'' if the octet-string does not decode to a point on the
+  prime subgroup \(\langle G \rangle\).
 \item
   The hash function \texttt{hash} is SHA-512 as specified in
   \href{https://datatracker.ietf.org/doc/rfc6234}{RFC-6234} {[}6{]},
@@ -467,7 +468,7 @@ described in section 2.1 of this specification.
 \item
   \(k \leftarrow nonce(x, I)\)
 \item
-  \(k_b \leftarrow nonce(k, I)\)
+  \(k_b \leftarrow nonce(b, I)\)
 \item
   \(\bar{Y} \leftarrow x \cdot G + b \cdot B\)
 \item
