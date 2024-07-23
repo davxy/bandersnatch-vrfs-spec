@@ -47,7 +47,7 @@ dependencies = [
 [[package]]
 name = "ark-ec-vrfs"
 version = "0.1.0"
-source = "git+https://github.com/davxy/ark-ec-vrfs#2941337ecafe36b5ec296fb4b7e30110256abb45"
+source = "git+https://github.com/davxy/ark-ec-vrfs?rev=c924bf6#c924bf660d9e548b60ccd0f9ebeaa0447f905e27"
 dependencies = [
  "ark-bls12-381",
  "ark-ec",
@@ -56,8 +56,6 @@ dependencies = [
  "ark-serialize",
  "ark-std",
  "digest",
- "fflonk",
- "merlin",
  "rand_chacha",
  "rayon",
  "ring",
@@ -179,9 +177,9 @@ dependencies = [
 
 [[package]]
 name = "arrayref"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b4930d2cb77ce62f89ee5d5289b4ac049559b1c45539271f5ed4fdc7db34545"
+checksum = "9d151e35f61089500b617991b791fc8bfd237ae50cd5950803758a179b41e67a"
 
 [[package]]
 name = "arrayvec"
@@ -239,7 +237,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "common"
 version = "0.1.0"
-source = "git+https://github.com/davxy/ring-proof?branch=extended#f81008e966691029f84f4b6acd840084e9d918f5"
+source = "git+https://github.com/davxy/ring-proof?branch=extended#6524d3a17b2ddadcfca2f2934d3aed7bb129fa9f"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -545,13 +543,14 @@ dependencies = [
 [[package]]
 name = "ring"
 version = "0.1.0"
-source = "git+https://github.com/davxy/ring-proof?branch=extended#f81008e966691029f84f4b6acd840084e9d918f5"
+source = "git+https://github.com/davxy/ring-proof?branch=extended#6524d3a17b2ddadcfca2f2934d3aed7bb129fa9f"
 dependencies = [
  "ark-ec",
  "ark-ff",
  "ark-poly",
  "ark-serialize",
  "ark-std",
+ "arrayvec",
  "blake2",
  "common",
  "fflonk",

@@ -1,8 +1,7 @@
 use ark_ec_vrfs::suites::bandersnatch::edwards as bandersnatch;
 use ark_ec_vrfs::{prelude::ark_serialize, suites::bandersnatch::edwards::RingContext};
-use bandersnatch::{IetfProof, Input, Output, Public, RingProof, Secret};
-
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use bandersnatch::{IetfProof, Input, Output, Public, RingProof, Secret};
 
 const RING_SIZE: usize = 1023;
 
@@ -138,9 +137,7 @@ impl Verifier {
         aux_data: &[u8],
         signature: &[u8],
     ) -> Result<[u8; 32], ()> {
-        use ark_ec_vrfs::ring::prelude::fflonk::pcs::PcsParams;
         use ark_ec_vrfs::ring::Verifier as _;
-        use bandersnatch::VerifierKey;
 
         let signature = RingVrfSignature::deserialize_compressed(signature).unwrap();
 
@@ -154,10 +151,7 @@ impl Verifier {
         // As an alternative we can construct the verifier key using the
         // RingContext::verifier_key() method, but is more expensive.
         // In other words, we prefer computing the commitment once, when the keyset changes.
-        let verifier_key = VerifierKey::from_commitment_and_kzg_vk(
-            self.commitment.clone(),
-            ring_ctx.pcs_params.raw_vk(),
-        );
+        let verifier_key = ring_ctx.verifier_key_from_commitment(self.commitment.clone());
         let verifier = ring_ctx.verifier(verifier_key);
         if Public::verify(input, output, aux_data, &signature.proof, &verifier).is_err() {
             println!("Ring signature verification failure");
