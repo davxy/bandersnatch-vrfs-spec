@@ -74,7 +74,7 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{10 Jul 2024 - Draft 9}
+\date{26 Jul 2024 - Draft 10}
 
 \begin{document}
 \maketitle
@@ -246,7 +246,7 @@ guidelines defined in section 5.5 of
 \item
   \(I \in \langle G \rangle\): VRF input point
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -305,7 +305,7 @@ guidelines defined in section 5.5 of
 \item
   \(I \in \langle G \rangle\): VRF input point
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \item
   \(O \in \langle G \rangle\): VRF output point
 \item
@@ -361,7 +361,7 @@ Challenge construction mostly follows the procedure given in section
 \item
   \(Points \in \langle G \rangle^n\): Sequence of \(n\) points.
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -444,7 +444,7 @@ described in section 2.1 of this specification.
 \item
   \(I \in \langle G \rangle\): VRF input point
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -497,7 +497,7 @@ described in section 2.1 of this specification.
 \item
   \(I \in \langle G \rangle\): VRF input point
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \item
   \(O \in \langle G \rangle\): VRF output point
 \item
@@ -526,7 +526,7 @@ described in section 2.1 of this specification.
   \textbf{if} \(O_k + c \cdot O \neq I \cdot s\) \textbf{then}
   \textbf{return} False
 \item
-  \textbf{if} \(R + c \cdot \bar{Y} \neq s \cdot G - s_b \cdot B\)
+  \textbf{if} \(R + c \cdot \bar{Y} \neq s \cdot G + s_b \cdot B\)
   \textbf{then} \textbf{return} False
 \item
   \textbf{return} True
@@ -575,7 +575,7 @@ Ring proof configuration:
 \item
   \(I \in \langle G \rangle\): VRF input point
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -613,13 +613,13 @@ Ring proof configuration:
 \begin{itemize}
 \tightlist
 \item
-  \(V \in (G_1)^3\): Ring verifier
+  \(V \in (G_1)^3\): Ring verifier.
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \langle G \rangle\): VRF input point.
 \item
-  \(O\): VRF Output \(\in \langle G \rangle\).
+  \(O \in G\): VRF Output point.
 \item
-  \(ad\): Additional data octet-string
+  \(ad \in \Sigma^*\): Additional data octet-string.
 \item
   \(\pi_p \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
   Pedersen proof

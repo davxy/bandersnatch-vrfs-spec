@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 10 Jul 2024 - Draft 9
+date: 26 Jul 2024 - Draft 10
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -125,7 +125,7 @@ section 5.5 of [RFC-9381].
 
 - $x \in \F$: Secret key
 - $I \in \G$: VRF input point
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 
 **Output**:
 
@@ -153,7 +153,7 @@ section 5.5 of [RFC-9381].
 
 - $Y \in \G$: Public key
 - $I \in \G$: VRF input point
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 - $O \in \G$: VRF output point
 - $\pi \in (\F, \F)$: Schnorr-like proof
 
@@ -183,7 +183,7 @@ Challenge construction mostly follows the procedure given in section 5.4.3 of
 **Input**:  
 
 - $Points \in \G^n$: Sequence of $n$ points.
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 
 **Output**:  
 
@@ -238,7 +238,7 @@ section 2.1 of this specification.
 - $x \in \F$: Secret key
 - $b \in \F$: Secret blinding factor
 - $I \in \G$: VRF input point
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 
 **Output**:
 
@@ -264,7 +264,7 @@ section 2.1 of this specification.
 **Input**:  
 
 - $I \in \G$: VRF input point
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 - $O \in \G$: VRF output point
 - $\pi \in (\G, \G, \G, \F, \F)$: Pedersen proof
 
@@ -277,7 +277,7 @@ section 2.1 of this specification.
 1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi$
 2. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
 3. **if** $O_k + c \cdot O \neq I \cdot s$ **then** **return** False
-4. **if** $R + c \cdot \bar{Y} \neq s \cdot G - s_b \cdot B$ **then** **return** False
+4. **if** $R + c \cdot \bar{Y} \neq s \cdot G + s_b \cdot B$ **then** **return** False
 5. **return** True
 
 
@@ -304,7 +304,7 @@ Ring proof configuration:
 - $P \in TODO$: Ring prover
 - $b \in \F$: Secret blinding factor
 - $I \in \G$: VRF input point
-- $ad$: Additional data octet-string
+- $ad \in \Sigma^*$: Additional data octet-string.
 
 **Output**:
 
@@ -322,10 +322,10 @@ Ring proof configuration:
 
 **Input**:  
 
-- $V \in (G_1)^3$: Ring verifier
-- $I \in \G$: VRF input point
-- $O$: VRF Output $\in \G$.
-- $ad$: Additional data octet-string
+- $V \in (G_1)^3$: Ring verifier.
+- $I \in \G$: VRF input point.
+- $O \in G$: VRF Output point.
+- $ad \in \Sigma^*$: Additional data octet-string.
 - $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
 - $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
 
