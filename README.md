@@ -14,6 +14,11 @@ This specification provides detailed insights into the usage of these primitives
 with Bandersnatch, an elliptic curve constructed over the BLS12-381 scalar field
 specified in [MSZ21] [@MSZ21].
 
+## Test Vectors
+
+* [IETF](data/vectors/bandersnatch_ed_sha512_ell2_ietf_vectors.json)
+* [Pedersen](data/vectors/bandersnatch_ed_sha512_ell2_pedersen_vectors.json)
+
 ## References
 
 * [Reference Implementation](https://github.com/davxy/ark-ec-vrfs)
