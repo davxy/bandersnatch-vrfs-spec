@@ -18,6 +18,7 @@ specified in [MSZ21] [@MSZ21].
 
 * [IETF](vectors/bandersnatch_ed_sha512_ell2_ietf_vectors.json)
 * [Pedersen](vectors/bandersnatch_ed_sha512_ell2_pedersen_vectors.json)
+* [Ring](vectors/bandersnatch_ed_sha512_ell2_ring_vectors.json)
 
 ## References
 
