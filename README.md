@@ -16,8 +16,8 @@ specified in [MSZ21] [@MSZ21].
 
 ## Test Vectors
 
-* [IETF](data/vectors/bandersnatch_ed_sha512_ell2_ietf_vectors.json)
-* [Pedersen](data/vectors/bandersnatch_ed_sha512_ell2_pedersen_vectors.json)
+* [IETF](vectors/bandersnatch_ed_sha512_ell2_ietf_vectors.json)
+* [Pedersen](vectors/bandersnatch_ed_sha512_ell2_pedersen_vectors.json)
 
 ## References
 
