@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "6b07f6f", features = ["bandersnatch", "ring", "parallel", "test-vectors"] }
+ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "8cef209", features = ["bandersnatch", "ring", "parallel", "test-vectors"] }
 hex = "0.4.3"
