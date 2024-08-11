@@ -296,6 +296,25 @@ Ring proof configuration:
 - $G_2$: BLS12-381 $G_2$
 - TODO: ...
 
+- **Groups and Fields**:
+  - $\mathbb{G}$: BLS12-381 prime order subgroup.
+  - $\mathbb{F}$: BLS12-381 scalar field.
+  - $J$: Bandersnatch curve defined over $\mathbb{F}$.
+
+- **Polynomial Commitment Scheme**
+    - KZG with SRS derived from Zcash (...TODO)
+
+- **Fiat-Shamir Transform**
+    - [`merlin`](TODO) library
+    - Specify how parameters are added as we progress in the protocol
+    - Begin with empty transcript, push $R$, incrementally add and sample when required
+
+- **Constants** (TODO)
+    - Seed point $S$
+    - Pedersen commitment base $H$
+    - Padding element $\square$
+    - $\omega$: ... (taken as ark generator for bandersnatch Fq (aka BLS12-381 Fr))
+
 ## 4.2. Prove
 
 **Input**:
@@ -315,7 +334,7 @@ Ring proof configuration:
 **Steps**:
 
 1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)$
-2. $\pi_r \leftarrow Ring.prove(P, b)$ (TODO)
+2. $\pi_r \leftarrow Ring.prove(P, b)$
 3. **return** $(O, \pi_p, \pi_r)$
 
 ## 4.3. Verify
@@ -324,7 +343,7 @@ Ring proof configuration:
 
 - $V \in (G_1)^3$: Ring verifier.
 - $I \in \G$: VRF input point.
-- $O \in G$: VRF Output point.
+- $O \in G$: VRF output point.
 - $ad \in \Sigma^*$: Additional data octet-string.
 - $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
 - $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
@@ -335,11 +354,11 @@ Ring proof configuration:
 
 **Steps**:
 
-1. $rp = Pedersen.verify(I, ad, O, \pi_p)$
-2. **if** $rp \neq True$ **return** False
-3. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p$
-4. $rr = Ring.verify(V, \pi_r, \bar{Y})$
-5. **if** $rr \neq True$ **return** False
+1. $r_p = Pedersen.verify(I, ad, O, \pi_p)$
+2. **if** $r_p \neq True$ **return** False
+3. $(\bar{Y}, _, _, _, _) \leftarrow \pi_p$
+4. $r_r = Ring.verify(V, \pi_r, \bar{Y})$
+5. **if** $r_r \neq True$ **return** False
 6. **return** True
 
 
