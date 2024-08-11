@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 29 Jul 2024 - Draft 13
+date: 11 Aug 2024 - Draft 14
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -82,8 +82,8 @@ section 5.5 of [RFC-9381].
   [MSZ21]. For this group, `fLen` = `qLen` = $32$ and `cofactor` = $4$.
 
 - The prime subgroup generator $G \in \G$ is defined as follows:
-  $$_{G.x = \texttt{0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}}$$
-  $$_{G.y = \texttt{0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}}$$
+  $$_{G_x = 18886178867200960497001835917649091219057080094937609519140440539760939937304}$$
+  $$_{G_y = 19188667384257783945677642223292697773471335439753913231509108946878080696678}$$
 
 - `cLen` = 32.
 
@@ -221,11 +221,10 @@ generation procedure.
 ## 3.1. Configuration
 
 Pedersen VRF is configured for prime subgroup $\G$ of Bandersnatch elliptic
-curve $E$ defined in [MSZ21] [@MSZ21] with *blinding base* $B \in \G$ defined
-as follows:
-
-$$_{B.x = \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}}$$
-$$_{B.y = \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}}$$
+curve $E$, in Twisted Edwards form, defined in [MSZ21] [@MSZ21] with *blinding base*
+$B \in \G$ defined as follows:
+$$_{B_x = 14576224270591906826192118712803723445031237947873156025406837473427562701854}$$
+$$_{B_y = 38436873314098705092845609371301773715650206984323659492499960072785679638442}$$
 
 For all the other configurable parameters and external functions we adhere as
 much as possible to the Bandersnatch cipher suite for IETF VRF described in
@@ -287,14 +286,38 @@ Anonymized ring VRF based of [Pedersen VRF] and Ring Proof as proposed by [Vasil
 
 ## 4.1. Configuration
 
-Setup for plain [Pedersen VRF] applies.
+Ring proof is configured to work together with Pedersen VRF as presented by this specification.
 
-Ring proof configuration:
+The following configuration should be applied to the parameters left unspecified by the Vasilyev ring proof spec.
 
-- KZG PCS uses [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) SRS and a domain of 2048 entries.
-- $G_1$: BLS12-381 $G_1$
-- $G_2$: BLS12-381 $G_2$
-- TODO: ...
+- **Groups and Fields**:
+  - $\mathbb{G}$: BLS12-381 prime order subgroup.
+  - $\mathbb{F}$: BLS12-381 scalar field.
+  - $J$: Bandersnatch curve defined over $\mathbb{F}$.
+
+- **Polynomial Commitment Scheme**
+  - KZG with SRS derived from [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) powers of tau ceremony.
+  - $\text{PCS.Commit} \equiv \text{KZG.Commit}$
+
+- **Fiat-Shamir Transform**
+  - [`merlin`](https://merlin.cool) library implementation.
+  - Begin with empty transcript with empty label.
+  - Push $R$ to the transcript after creation
+  - TODO: Specify how parameters are added to the transcript as we progress through the protocol
+
+- Accumulator seed point (Twisted Edwards form):
+$$_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
+$$_{\text{S}_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}$$
+
+- Padding point (Twisted Edwards form):
+$$_{\square_x = 5259734940318236869621856335705224150406219599146660415951585879123115970561}$$
+$$_{\square_y = 23297815351169973518610888463679675079080900957871871916328881498043316508082}$$
+
+- Polynomials domain ($\langle \omega \rangle = \mathbb{D}$) generator:
+$$_{\omega = 49307615728544765012166121802278658070711169839041683575071795236746050763237}$$
+
+- $|\mathbb{D}| = 2048$
+
 
 ## 4.2. Prove
 
@@ -315,7 +338,7 @@ Ring proof configuration:
 **Steps**:
 
 1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)$
-2. $\pi_r \leftarrow Ring.prove(P, b)$ (TODO)
+2. $\pi_r \leftarrow Ring.prove(P, b)$
 3. **return** $(O, \pi_p, \pi_r)$
 
 ## 4.3. Verify
@@ -324,7 +347,7 @@ Ring proof configuration:
 
 - $V \in (G_1)^3$: Ring verifier.
 - $I \in \G$: VRF input point.
-- $O \in G$: VRF Output point.
+- $O \in G$: VRF output point.
 - $ad \in \Sigma^*$: Additional data octet-string.
 - $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
 - $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
@@ -335,11 +358,11 @@ Ring proof configuration:
 
 **Steps**:
 
-1. $rp = Pedersen.verify(I, ad, O, \pi_p)$
-2. **if** $rp \neq True$ **return** False
+1. $r_p = Pedersen.verify(I, ad, O, \pi_p)$
+2. **if** $r_p \neq True$ **return** False
 3. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p$
-4. $rr = Ring.verify(V, \pi_r, \bar{Y})$
-5. **if** $rr \neq True$ **return** False
+4. $r_r = Ring.verify(V, \pi_r, \bar{Y})$
+5. **if** $r_r \neq True$ **return** False
 6. **return** True
 
 
