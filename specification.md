@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 29 Jul 2024 - Draft 13
+date: 11 Aug 2024 - Draft 14
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -297,6 +297,7 @@ The following configuration should be applied to the parameters left unspecified
 
 - **Polynomial Commitment Scheme**
   - KZG with SRS derived from [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) powers of tau ceremony.
+  - $\text{PCS.Commit} \equiv \text{KZG.Commit}$
 
 - **Fiat-Shamir Transform**
   - [`merlin`](https://merlin.cool) library implementation.
@@ -305,17 +306,17 @@ The following configuration should be applied to the parameters left unspecified
   - TODO: Specify how parameters are added to the transcript as we progress through the protocol
 
 - Accumulator seed point (Twisted Edwards form):
-$$_{\S_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
-$$_{\S_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}$$
+$$_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
+$$_{\text{S}_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}$$
 
 - Padding point (Twisted Edwards form):
 $$_{\square_x = 5259734940318236869621856335705224150406219599146660415951585879123115970561}$$
 $$_{\square_y = 23297815351169973518610888463679675079080900957871871916328881498043316508082}$$
 
-- $|\mathbb{D}| = 2048$
-
-- Polynomials evaluation domain generator.
+- Polynomials domain ($\langle \omega \rangle = \mathbb{D}$) generator:
 $$_{\omega = 49307615728544765012166121802278658070711169839041683575071795236746050763237}$$
+
+- $|\mathbb{D}| = 2048$
 
 
 ## 4.2. Prove
