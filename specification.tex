@@ -182,8 +182,8 @@ guidelines defined in section 5.5 of
 \item
   The prime subgroup generator \(G \in \langle G \rangle\) is defined as
   follows:
-  \[_{G.x = \texttt{0x29c132cc2c0b34c5743711777bbe42f32b79c022ad998465e1e71866a252ae18}}\]
-  \[_{G.y = \texttt{0x2a6c669eda123e0f157d8b50badcd586358cad81eee464605e3167b6cc974166}}\]
+  \[_{G_x = 18886178867200960497001835917649091219057080094937609519140440539760939937304}\]
+  \[_{G_y = 19188667384257783945677642223292697773471335439753913231509108946878080696678}\]
 \item
   \texttt{cLen} = 32.
 \item
@@ -419,12 +419,11 @@ generation procedure.
 \subsection{3.1. Configuration}\label{configuration-1}}
 
 Pedersen VRF is configured for prime subgroup \(\langle G \rangle\) of
-Bandersnatch elliptic curve \(E\) defined in
+Bandersnatch elliptic curve \(E\), in Twisted Edwards form, defined in
 \href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
 \emph{blinding base} \(B \in \langle G \rangle\) defined as follows:
-
-\[_{B.x = \texttt{0x2039d9bf2ecb2d4433182d4a940ec78d34f9d19ec0d875703d4d04a168ec241e}}\]
-\[_{B.y = \texttt{0x54fa7fd5193611992188139d20221028bf03ee23202d9706a46f12b3f3605faa}}\]
+\[_{B_x = 14576224270591906826192118712803723445031237947873156025406837473427562701854}\]
+\[_{B_y = 38436873314098705092845609371301773715650206984323659492499960072785679638442}\]
 
 For all the other configurable parameters and external functions we
 adhere as much as possible to the Bandersnatch cipher suite for IETF VRF
@@ -541,22 +540,63 @@ proposed by \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}.
 \hypertarget{configuration-2}{%
 \subsection{4.1. Configuration}\label{configuration-2}}
 
-Setup for plain {[}Pedersen VRF{]} applies.
+Ring proof is configured to work together with Pedersen VRF as presented
+by this specification.
 
-Ring proof configuration:
+The following configuration should be applied to the parameters left
+unspecified by the Vasilyev ring proof spec.
 
 \begin{itemize}
-\tightlist
 \item
-  KZG PCS uses
-  \href{https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony}{Zcash}
-  SRS and a domain of 2048 entries.
+  \textbf{Groups and Fields}:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \(\mathbb{G}\): BLS12-381 prime order subgroup.
+  \item
+    \(\mathbb{F}\): BLS12-381 scalar field.
+  \item
+    \(J\): Bandersnatch curve defined over \(\mathbb{F}\).
+  \end{itemize}
 \item
-  \(G_1\): BLS12-381 \(G_1\)
+  \textbf{Polynomial Commitment Scheme}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    KZG with SRS derived from
+    \href{https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony}{Zcash}
+    powers of tau ceremony.
+  \end{itemize}
 \item
-  \(G_2\): BLS12-381 \(G_2\)
+  \textbf{Fiat-Shamir Transform}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \href{https://merlin.cool}{\texttt{merlin}} library implementation.
+  \item
+    Begin with empty transcript with empty label.
+  \item
+    Push \(R\) to the transcript after creation
+  \item
+    TODO: Specify how parameters are added to the transcript as we
+    progress through the protocol
+  \end{itemize}
 \item
-  TODO: \ldots{}
+  Accumulator seed point (Twisted Edwards form):
+  \[_{\S_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}\]
+  \[_{\S_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}\]
+\item
+  Padding point (Twisted Edwards form):
+  \[_{\square_x = 5259734940318236869621856335705224150406219599146660415951585879123115970561}\]
+  \[_{\square_y = 23297815351169973518610888463679675079080900957871871916328881498043316508082}\]
+\item
+  \(|\mathbb{D}| = 2048\)
+\item
+  Polynomials evaluation domain generator.
+  \[_{\omega = 49307615728544765012166121802278658070711169839041683575071795236746050763237}\]
 \end{itemize}
 
 \hypertarget{prove-2}{%
@@ -600,7 +640,7 @@ Ring proof configuration:
 \item
   \((O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)\)
 \item
-  \(\pi_r \leftarrow Ring.prove(P, b)\) (TODO)
+  \(\pi_r \leftarrow Ring.prove(P, b)\)
 \item
   \textbf{return} \((O, \pi_p, \pi_r)\)
 \end{enumerate}
@@ -617,7 +657,7 @@ Ring proof configuration:
 \item
   \(I \in \langle G \rangle\): VRF input point.
 \item
-  \(O \in G\): VRF Output point.
+  \(O \in G\): VRF output point.
 \item
   \(ad \in \Sigma^*\): Additional data octet-string.
 \item
@@ -642,15 +682,15 @@ Ring proof configuration:
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(rp = Pedersen.verify(I, ad, O, \pi_p)\)
+  \(r_p = Pedersen.verify(I, ad, O, \pi_p)\)
 \item
-  \textbf{if} \(rp \neq True\) \textbf{return} False
+  \textbf{if} \(r_p \neq True\) \textbf{return} False
 \item
   \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p\)
 \item
-  \(rr = Ring.verify(V, \pi_r, \bar{Y})\)
+  \(r_r = Ring.verify(V, \pi_r, \bar{Y})\)
 \item
-  \textbf{if} \(rr \neq True\) \textbf{return} False
+  \textbf{if} \(r_r \neq True\) \textbf{return} False
 \item
   \textbf{return} True
 \end{enumerate}
