@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 11 Aug 2024 - Draft 14
+date: 18 Aug 2024 - draft 15
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -19,7 +19,7 @@ by incorporating auxiliary information into its signature. We're going to first
 provide a specification to extend IETF's ECVRF as outlined in [RFC-9381] [@RFC9381],
 then we describe a variant of the Pedersen VRF originally introduced by
 [BCHSV23] [@BCHSV23], which serves as a fundamental component for implementing
-anonymized ring signatures as further elaborated by [Vasilyev] [@Vasilyev].
+anonymized ring signatures as further elaborated by [VG24] [@VG24].
 This specification provides detailed insights into the usage of these primitives
 with Bandersnatch, an elliptic curve constructed over the BLS12-381 scalar field
 specified in [MSZ21] [@MSZ21].
@@ -282,28 +282,29 @@ section 2.1 of this specification.
 
 # 4. Ring VRF
 
-Anonymized ring VRF based of [Pedersen VRF] and Ring Proof as proposed by [Vasilyev].
+Anonymized ring VRF based of [Pedersen VRF] and Ring Proof as proposed in [VG24].
 
 ## 4.1. Configuration
 
-Ring proof is configured to work together with Pedersen VRF as presented by this specification.
+Ring proof is configured to work together with Pedersen VRF as presented in
+this specification.
 
-The following configuration should be applied to the parameters left unspecified by the Vasilyev ring proof spec.
+The following configuration should be applied to specialize [VG24] in order to
+instance the concrete scheme.
 
 - **Groups and Fields**:
-  - $\mathbb{G}$: BLS12-381 prime order subgroup.
+  - $\mathbb{G_1}$: BLS12-381 prime order subgroup.
   - $\mathbb{F}$: BLS12-381 scalar field.
   - $J$: Bandersnatch curve defined over $\mathbb{F}$.
 
 - **Polynomial Commitment Scheme**
   - KZG with SRS derived from [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) powers of tau ceremony.
-  - $\text{PCS.Commit} \equiv \text{KZG.Commit}$
 
 - **Fiat-Shamir Transform**
   - [`merlin`](https://merlin.cool) library implementation.
   - Begin with empty transcript with empty label.
-  - Push $R$ to the transcript after creation
-  - TODO: Specify how parameters are added to the transcript as we progress through the protocol
+  - Push $R$ to the transcript after instancing.
+  - TODO: Specify the order and how parameters are added to the transcript as we progress the protocol.
 
 - Accumulator seed point (Twisted Edwards form):
 $$_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
@@ -318,13 +319,22 @@ $$_{\omega = 4930761572854476501216612180227865807071116983904168357507179523674
 
 - $|\mathbb{D}| = 2048$
 
+### 4.1.1. Short Weierstrass Form Requirement
+
+The Ring-Proof scheme, as outlined in [VG24], mandates that all points must be
+in Short Weierstrass form. Therefore, any point used in this scheme, whether
+derived from Twisted Edwards form or otherwise, must first be converted to
+Short Weierstrass form. This requirement applies to both user-related values,
+such as the ring points used by the ring public keys, and to configuration points
+like the accumulator and padding.
 
 ## 4.2. Prove
 
 **Input**:
 
 - $x \in \F$: Secret key
-- $P \in TODO$: Ring prover
+- $P \in ?$: Ring prover
+- $k \in \mathbb{N}_k$: prover public key position within the ring
 - $b \in \F$: Secret blinding factor
 - $I \in \G$: VRF input point
 - $ad \in \Sigma^*$: Additional data octet-string.
@@ -337,7 +347,7 @@ $$_{\omega = 4930761572854476501216612180227865807071116983904168357507179523674
 
 **Steps**:
 
-1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)$
+1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, k, I, ad)$
 2. $\pi_r \leftarrow Ring.prove(P, b)$
 3. **return** $(O, \pi_p, \pi_r)$
 
@@ -345,7 +355,7 @@ $$_{\omega = 4930761572854476501216612180227865807071116983904168357507179523674
 
 **Input**:  
 
-- $V \in (G_1)^3$: Ring verifier.
+- $V \in (G_1)^3$: Ring verifier (pre-processed commitment).
 - $I \in \G$: VRF input point.
 - $O \in G$: VRF output point.
 - $ad \in \Sigma^*$: Additional data octet-string.
@@ -1036,4 +1046,4 @@ b8d97722ccfc97a5cf2cc77aa0bbf5a146dca7762b98e2b6bf4b8e34e04e214b
 [RFC-6234]: https://datatracker.ietf.org/doc/rfc6234
 [BCHSV23]: https://eprint.iacr.org/2023/002
 [MSZ21]: https://eprint.iacr.org/2021/1152
-[Vasilyev]: https://hackmd.io/ulW5nFFpTwClHsD0kusJAA
+[VG24]: https://github.com/davxy/ring-proof-spec

@@ -74,7 +74,7 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{11 Aug 2024 - Draft 14}
+\date{18 Aug 2024 - draft 15}
 
 \begin{document}
 \maketitle
@@ -97,7 +97,7 @@ we describe a variant of the Pedersen VRF originally introduced by
 \href{https://eprint.iacr.org/2023/002}{BCHSV23} {[}2{]}, which serves
 as a fundamental component for implementing anonymized ring signatures
 as further elaborated by
-\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev} {[}3{]}. This
+\href{https://github.com/davxy/ring-proof-spec}{VG24} {[}3{]}. This
 specification provides detailed insights into the usage of these
 primitives with Bandersnatch, an elliptic curve constructed over the
 BLS12-381 scalar field specified in
@@ -535,16 +535,17 @@ described in section 2.1 of this specification.
 \section{4. Ring VRF}\label{ring-vrf}}
 
 Anonymized ring VRF based of {[}Pedersen VRF{]} and Ring Proof as
-proposed by \href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Vasilyev}.
+proposed in \href{https://github.com/davxy/ring-proof-spec}{VG24}.
 
 \hypertarget{configuration-2}{%
 \subsection{4.1. Configuration}\label{configuration-2}}
 
 Ring proof is configured to work together with Pedersen VRF as presented
-by this specification.
+in this specification.
 
-The following configuration should be applied to the parameters left
-unspecified by the Vasilyev ring proof spec.
+The following configuration should be applied to specialize
+\href{https://github.com/davxy/ring-proof-spec}{VG24} in order to
+instance the concrete scheme.
 
 \begin{itemize}
 \item
@@ -553,7 +554,7 @@ unspecified by the Vasilyev ring proof spec.
   \begin{itemize}
   \tightlist
   \item
-    \(\mathbb{G}\): BLS12-381 prime order subgroup.
+    \(\mathbb{G_1}\): BLS12-381 prime order subgroup.
   \item
     \(\mathbb{F}\): BLS12-381 scalar field.
   \item
@@ -568,8 +569,6 @@ unspecified by the Vasilyev ring proof spec.
     KZG with SRS derived from
     \href{https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony}{Zcash}
     powers of tau ceremony.
-  \item
-    \(\text{PCS.Commit} \equiv \text{KZG.Commit}\)
   \end{itemize}
 \item
   \textbf{Fiat-Shamir Transform}
@@ -581,10 +580,10 @@ unspecified by the Vasilyev ring proof spec.
   \item
     Begin with empty transcript with empty label.
   \item
-    Push \(R\) to the transcript after creation
+    Push \(R\) to the transcript after instancing.
   \item
-    TODO: Specify how parameters are added to the transcript as we
-    progress through the protocol
+    TODO: Specify the order and how parameters are added to the
+    transcript as we progress the protocol.
   \end{itemize}
 \item
   Accumulator seed point (Twisted Edwards form):
@@ -602,6 +601,19 @@ unspecified by the Vasilyev ring proof spec.
   \(|\mathbb{D}| = 2048\)
 \end{itemize}
 
+\hypertarget{short-weierstrass-form-requirement}{%
+\subsubsection{4.1.1. Short Weierstrass Form
+Requirement}\label{short-weierstrass-form-requirement}}
+
+The Ring-Proof scheme, as outlined in
+\href{https://github.com/davxy/ring-proof-spec}{VG24}, mandates that all
+points must be in Short Weierstrass form. Therefore, any point used in
+this scheme, whether derived from Twisted Edwards form or otherwise,
+must first be converted to Short Weierstrass form. This requirement
+applies to both user-related values, such as the ring points used by the
+ring public keys, and to configuration points like the accumulator and
+padding.
+
 \hypertarget{prove-2}{%
 \subsection{4.2. Prove}\label{prove-2}}
 
@@ -612,7 +624,9 @@ unspecified by the Vasilyev ring proof spec.
 \item
   \(x \in \mathbb{Z}^*_r\): Secret key
 \item
-  \(P \in TODO\): Ring prover
+  \(P \in ?\): Ring prover
+\item
+  \(k \in \mathbb{N}_k\): prover public key position within the ring
 \item
   \(b \in \mathbb{Z}^*_r\): Secret blinding factor
 \item
@@ -641,7 +655,7 @@ unspecified by the Vasilyev ring proof spec.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((O, \pi_p) \leftarrow Pedersen.prove(x, b, I, ad)\)
+  \((O, \pi_p) \leftarrow Pedersen.prove(x, b, k, I, ad)\)
 \item
   \(\pi_r \leftarrow Ring.prove(P, b)\)
 \item
@@ -656,7 +670,7 @@ unspecified by the Vasilyev ring proof spec.
 \begin{itemize}
 \tightlist
 \item
-  \(V \in (G_1)^3\): Ring verifier.
+  \(V \in (G_1)^3\): Ring verifier (pre-processed commitment).
 \item
   \(I \in \langle G \rangle\): VRF input point.
 \item
@@ -1407,10 +1421,10 @@ Functions}}}; {RFC Editor}, 2023;}
 Vasilyev, S. \href{https://eprint.iacr.org/2023/002}{Ring Verifiable
 Random Functions and Zero-Knowledge Continuations} 2023.}
 
-\leavevmode\vadjust pre{\hypertarget{ref-Vasilyev}{}}%
+\leavevmode\vadjust pre{\hypertarget{ref-VG24}{}}%
 \CSLLeftMargin{3. }
-\CSLRightInline{Vasilyev, S.
-\href{https://hackmd.io/ulW5nFFpTwClHsD0kusJAA}{Ring Proof Technical
+\CSLRightInline{Vasilyev, S.; Galassi, D.
+\href{https://github.com/davxy/ring-proof-spec}{Ring Proof Technical
 Specification} 2024.}
 
 \leavevmode\vadjust pre{\hypertarget{ref-MSZ21}{}}%
