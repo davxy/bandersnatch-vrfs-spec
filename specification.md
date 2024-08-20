@@ -658,10 +658,11 @@ c04b177f954d17e7c129ce8d55cb7f148b3957078c96e7229100dc50b7d62b02,
 
 ## A.3. Ring VRF Test Vectors
 
-Generated using [Zcash BLS12-381 URS](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony).
+KZG SRS parameters are derived from Zcash BLS12-381 [powers of tau ceremony](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony).
 
-Evaluation for the ZK domain items, i.e. the evaluations for the last 3 items in
-the evaluation domain $D$, are fixed to 0 instead of being randomly generated.
+The evaluations for the ZK domain items, specifically the evaluations of the
+last three items in the evaluation domain $\mathbb{D}$, are set to 0 rather than
+being randomly generated.
 
 Schema:
 
