@@ -4,13 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "8cef209", features = ["bandersnatch", "ring", "parallel"] }
+ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "36cdc90", features = ["bandersnatch", "ring", "parallel"] }
 hex = "0.4.3"
 
 # Deterministic ring proof.
 # WARNING: not for production, used to produce specification test vectors.
 [features]
 test-vectors = ["ark-ec-vrfs/test-vectors"]
-
-[patch."https://github.com/davxy/ark-ec-vrfs"]
-ark-ec-vrfs = { path = "/mnt/ssd/develop/personal/ark-ec-vrfs" }
