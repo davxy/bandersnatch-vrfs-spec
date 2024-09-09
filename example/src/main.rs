@@ -42,10 +42,7 @@ fn ring_context() -> &'static RingContext {
 
 // Construct VRF Input Point from arbitrary data (section 1.2)
 fn vrf_input_point(vrf_input_data: &[u8]) -> Input {
-    let point =
-        <bandersnatch::BandersnatchSha512Ell2 as ark_ec_vrfs::Suite>::data_to_point(vrf_input_data)
-            .unwrap();
-    Input::from(point)
+    Input::new(vrf_input_data).unwrap()
 }
 
 // Prover actor.
