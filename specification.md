@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 20 Aug 2024 - draft 16
+date: 9 Sep 2024 - Draft 17
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -50,7 +50,7 @@ A point in $\G$ generated from VRF input octet-string using the *Elligator 2*
 
 ## 1.3. VRF Output Point
 
-A point in $\G$ generated from VRF input point as: $Output \leftarrow sk \cdot Input$.
+A point in $\G$ generated from VRF input point as: $Output \gets sk \cdot Input$.
 
 ## 1.4. VRF Output
 
@@ -64,11 +64,34 @@ The first 32 bytes of the hash output are taken.
 An arbitrary length octet-string provided by the user to be signed together with
 the generated VRF output. This data doesn't influence the produced VRF output.
 
+## 1.6. Challenge Procedure
+
+Challenge construction mostly follows the procedure given in section 5.4.3 of
+[RFC-9381] [@RFC9381] with some tweaks to add additional data.
+
+**Input**:  
+
+- $\bar{P} \in \G^n$: Sequence of $n$ points.
+- $ad \in \Sigma^*$: Additional data octet-string.
+
+**Output**:  
+
+- $c \in \F$: Challenge scalar.  
+
+**Steps**:
+
+1. $str_0 \gets \texttt{suite\_string}\;\Vert\;0x02$
+2. $str_i \gets str_{i-1}\;\Vert\;\texttt{point\_to\_string}(P_{i-1}),\ i = 1 \dots n$
+3. $h \gets \texttt{hash}(str_n\;\Vert\;ad\;\Vert\;0x00)$
+4. $c \gets \texttt{string\_to\_int}(h_{0 \dots cLen - 1})$
+
+With `point_to_string`, `string_to_int` and `hash` as defined in section 2.1.
+
 
 # 2. IETF VRF
 
 Based on IETF [RFC-9381] which is extended with the capability to sign
-additional user data (`ad`).
+additional user data ($ad$).
 
 ## 2.1. Configuration
 
@@ -134,18 +157,17 @@ section 5.5 of [RFC-9381].
 
 **Steps**:
 
-1. $O \leftarrow x \cdot I$
-2. $Y \leftarrow x \cdot G$
-3. $k \leftarrow nonce(x, I)$
-4. $c \leftarrow challenge(Y, I, O, k \cdot G, k \cdot I, ad)$
-5. $s \leftarrow k + c \cdot x$
-6. $\pi \leftarrow (c, s)$
-7. **return** $(O, \pi)$
+1. $O \gets x \cdot I$
+2. $Y \gets x \cdot G$
+3. $k \gets \texttt{nonce}(x, I)$
+4. $c \gets \texttt{challenge}(Y, I, O, k \cdot G, k \cdot I, ad)$
+5. $s \gets k + c \cdot x$
+6. $\pi \gets (c, s)$
 
 **Externals**:
 
-- $nonce$: refer to section 5.4.2.2 of [RFC-9381].
-- $challenge$: refer to section 5.4.3 of [RFC-9381] and section 2.4 of this specification.
+- $\texttt{nonce}$: refer to section 5.4.2.2 of [RFC-9381].
+- $\texttt{challenge}$: refer to section 1.6 of this specification.
 
 ## 2.3. Verify
 
@@ -159,47 +181,19 @@ section 5.5 of [RFC-9381].
 
 **Output**:  
 
-- True if proof is valid, False otherwise
+- $\theta \in \{ \top, \bot \}$: $\top$ if proof is valid, $\bot$ otherwise.
 
 **Steps**:
 
-1. $(c, s) \leftarrow \pi$
-2. $U \leftarrow s \cdot G - c \cdot Y$
-3. $V \leftarrow s \cdot I - c \cdot O$
-4. $c' \leftarrow challenge(Y, I, O, U, V, ad)$
-5. **if** $c \neq c'$ **then** **return** False
-6. **return** True
+1. $(c, s) \gets \pi$
+2. $U \gets s \cdot G - c \cdot Y$
+3. $V \gets s \cdot I - c \cdot O$
+4. $c' \gets \texttt{challenge}(Y, I, O, U, V, ad)$
+5. $\theta \gets \top \text{ if } c = c' \text{ else } \bot$
 
 **Externals**:
 
-- $challenge$: as defined for $Sign$
-
-
-## 2.4. Challenge
-
-Challenge construction mostly follows the procedure given in section 5.4.3 of
-[RFC-9381] [@RFC9381] with some tweaks to add additional data.
-
-**Input**:  
-
-- $Points \in \G^n$: Sequence of $n$ points.
-- $ad \in \Sigma^*$: Additional data octet-string.
-
-**Output**:  
-
-- $c \in \F$: Challenge scalar.  
-
-**Steps**:
-
-1. $str$ = `suite_string` $\Vert$ `0x02`
-2. **for each** $P$ **in** $Points$: $str = str \Vert$ `point_to_string(`$P$`)`$
-3. $str = str \Vert ad \Vert 0x00$
-4. $h =$ `hash(`$str$`)`
-5. $h_t = h[0] \Vert .. \Vert h[cLen - 1]$
-6. $c =$ `string_to_int(`$h_t$`)`
-7. **return** $c$
-
-With `point_to_string`, `string_to_int` and `hash` as defined in section 2.1.
+- $\texttt{challenge}$: as defined for $Prove$
 
 
 # 3. Pedersen VRF
@@ -246,17 +240,16 @@ section 2.1 of this specification.
 
 **Steps**:
 
-1. $O \leftarrow x \cdot I$
-2. $k \leftarrow nonce(x, I)$
-3. $k_b \leftarrow nonce(b, I)$
-4. $\bar{Y} \leftarrow x \cdot G + b \cdot B$
-5. $R \leftarrow k \cdot G + k_b \cdot B$
-6. $O_k \leftarrow k \cdot I$
-7. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
-8. $s \leftarrow k + c \cdot x$
-9. $s_b \leftarrow k_b + c \cdot b$
-10. $\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)$
-11. **return** $(O, \pi)$
+1. $O \gets x \cdot I$
+2. $k \gets \texttt{nonce}(x, I)$
+3. $k_b \gets \texttt{nonce}(b, I)$
+4. $\bar{Y} \gets x \cdot G + b \cdot B$
+5. $R \gets k \cdot G + k_b \cdot B$
+6. $O_k \gets k \cdot I$
+7. $c \gets \texttt{challenge}(\bar{Y}, I, O, R, O_k, ad)$
+8. $s \gets k + c \cdot x$
+9. $s_b \gets k_b + c \cdot b$
+10. $\pi \gets (\bar{Y}, R, O_k, s, s_b)$
 
 ## 3.3. Verify  
 
@@ -269,16 +262,15 @@ section 2.1 of this specification.
 
 **Output**:  
 
-- True if proof is valid, False otherwise
+- $\theta \in \{ \top, \bot \}$: $\top$ if proof is valid, $\bot$ otherwise.
 
 **Steps**:
 
-1. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi$
-2. $c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)$
-3. **if** $O_k + c \cdot O \neq I \cdot s$ **then** **return** False
-4. **if** $R + c \cdot \bar{Y} \neq s \cdot G + s_b \cdot B$ **then** **return** False
-5. **return** True
-
+1. $(\bar{Y}, R, O_k, s, s_b) \gets \pi$
+2. $c \gets \texttt{challenge}(\bar{Y}, I, O, R, O_k, ad)$
+3. $\theta_0 \gets \top \text{ if } O_k + c \cdot O = I \cdot s \text{ else } \bot$
+4. $\theta_1 \gets \top \text{ if } R + c \cdot \bar{Y} = s \cdot G + s_b \cdot B \text{ else } \bot$
+5. $\theta = \theta_0 \land \theta_1$
 
 # 4. Ring VRF
 
@@ -347,9 +339,8 @@ like the accumulator and padding.
 
 **Steps**:
 
-1. $(O, \pi_p) \leftarrow Pedersen.prove(x, b, k, I, ad)$
-2. $\pi_r \leftarrow Ring.prove(P, b)$
-3. **return** $(O, \pi_p, \pi_r)$
+1. $(O, \pi_p) \gets Pedersen.prove(x, b, k, I, ad)$
+2. $\pi_r \gets Ring.prove(P, b)$
 
 ## 4.3. Verify
 
@@ -364,22 +355,20 @@ like the accumulator and padding.
 
 **Output**:  
 
-- True if proof is valid, False otherwise
+- $\theta \in \{ \top, \bot \}$: $\top$ if proof is valid, $\bot$ otherwise.
 
 **Steps**:
 
-1. $r_p = Pedersen.verify(I, ad, O, \pi_p)$
-2. **if** $r_p \neq True$ **return** False
-3. $(\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p$
-4. $r_r = Ring.verify(V, \pi_r, \bar{Y})$
-5. **if** $r_r \neq True$ **return** False
-6. **return** True
+1. $\theta_0 = Pedersen.verify(I, ad, O, \pi_p)$
+2. $(\bar{Y}, R, O_k, s, s_b) \gets \pi_p$
+4. $\theta_1 = Ring.verify(V, \pi_r, \bar{Y})$
+6. $\theta \gets \theta_0 \land \theta_1$
 
 
 # Appendix A
 
 The test vectors in this section were generated using code provided
-at https://github.com/davxy/ark-ec-vrfs.
+at [`https://github.com/davxy/ark-ec-vrfs`](https://github.com/davxy/ark-ec-vrfs).
 
 ## A.1. IETF VRF Test Vectors
 

@@ -74,7 +74,7 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{20 Aug 2024 - draft 16}
+\date{9 Sep 2024 - Draft 17}
 
 \begin{document}
 \maketitle
@@ -138,7 +138,7 @@ by section 6.8.2 of
 \subsection{1.3. VRF Output Point}\label{vrf-output-point}}
 
 A point in \(\langle G \rangle\) generated from VRF input point as:
-\(Output \leftarrow sk \cdot Input\).
+\(Output \gets sk \cdot Input\).
 
 \hypertarget{vrf-output}{%
 \subsection{1.4. VRF Output}\label{vrf-output}}
@@ -156,12 +156,55 @@ An arbitrary length octet-string provided by the user to be signed
 together with the generated VRF output. This data doesn't influence the
 produced VRF output.
 
+\hypertarget{challenge-procedure}{%
+\subsection{1.6. Challenge Procedure}\label{challenge-procedure}}
+
+Challenge construction mostly follows the procedure given in section
+5.4.3 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}
+{[}1{]} with some tweaks to add additional data.
+
+\textbf{Input}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\bar{P} \in \langle G \rangle^n\): Sequence of \(n\) points.
+\item
+  \(ad \in \Sigma^*\): Additional data octet-string.
+\end{itemize}
+
+\textbf{Output}:
+
+\begin{itemize}
+\tightlist
+\item
+  \(c \in \mathbb{Z}^*_r\): Challenge scalar.
+\end{itemize}
+
+\textbf{Steps}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \(str_0 \gets \texttt{suite\_string}\;\Vert\;0x02\)
+\item
+  \(str_i \gets str_{i-1}\;\Vert\;\texttt{point\_to\_string}(P_{i-1}),\ i = 1 \dots n\)
+\item
+  \(h \gets \texttt{hash}(str_n\;\Vert\;ad\;\Vert\;0x00)\)
+\item
+  \(c \gets \texttt{string\_to\_int}(h_{0 \dots cLen - 1})\)
+\end{enumerate}
+
+With \texttt{point\_to\_string}, \texttt{string\_to\_int} and
+\texttt{hash} as defined in section 2.1.
+
 \hypertarget{ietf-vrf}{%
 \section{2. IETF VRF}\label{ietf-vrf}}
 
 Based on IETF \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}
 which is extended with the capability to sign additional user data
-(\texttt{ad}).
+(\(ad\)).
 
 \hypertarget{configuration}{%
 \subsection{2.1. Configuration}\label{configuration}}
@@ -265,19 +308,17 @@ guidelines defined in section 5.5 of
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(O \leftarrow x \cdot I\)
+  \(O \gets x \cdot I\)
 \item
-  \(Y \leftarrow x \cdot G\)
+  \(Y \gets x \cdot G\)
 \item
-  \(k \leftarrow nonce(x, I)\)
+  \(k \gets \texttt{nonce}(x, I)\)
 \item
-  \(c \leftarrow challenge(Y, I, O, k \cdot G, k \cdot I, ad)\)
+  \(c \gets \texttt{challenge}(Y, I, O, k \cdot G, k \cdot I, ad)\)
 \item
-  \(s \leftarrow k + c \cdot x\)
+  \(s \gets k + c \cdot x\)
 \item
-  \(\pi \leftarrow (c, s)\)
-\item
-  \textbf{return} \((O, \pi)\)
+  \(\pi \gets (c, s)\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -285,12 +326,10 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  \(nonce\): refer to section 5.4.2.2 of
+  \(\texttt{nonce}\): refer to section 5.4.2.2 of
   \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}.
 \item
-  \(challenge\): refer to section 5.4.3 of
-  \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381} and section
-  2.4 of this specification.
+  \(\texttt{challenge}\): refer to section 1.6 of this specification.
 \end{itemize}
 
 \hypertarget{verify}{%
@@ -317,7 +356,8 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise
+  \(\theta \in \{ \top, \bot \}\): \(\top\) if proof is valid, \(\bot\)
+  otherwise.
 \end{itemize}
 
 \textbf{Steps}:
@@ -326,17 +366,15 @@ guidelines defined in section 5.5 of
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((c, s) \leftarrow \pi\)
+  \((c, s) \gets \pi\)
 \item
-  \(U \leftarrow s \cdot G - c \cdot Y\)
+  \(U \gets s \cdot G - c \cdot Y\)
 \item
-  \(V \leftarrow s \cdot I - c \cdot O\)
+  \(V \gets s \cdot I - c \cdot O\)
 \item
-  \(c' \leftarrow challenge(Y, I, O, U, V, ad)\)
+  \(c' \gets \texttt{challenge}(Y, I, O, U, V, ad)\)
 \item
-  \textbf{if} \(c \neq c'\) \textbf{then} \textbf{return} False
-\item
-  \textbf{return} True
+  \(\theta \gets \top \text{ if } c = c' \text{ else } \bot\)
 \end{enumerate}
 
 \textbf{Externals}:
@@ -344,58 +382,8 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  \(challenge\): as defined for \(Sign\)
+  \(\texttt{challenge}\): as defined for \(Prove\)
 \end{itemize}
-
-\hypertarget{challenge}{%
-\subsection{2.4. Challenge}\label{challenge}}
-
-Challenge construction mostly follows the procedure given in section
-5.4.3 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}
-{[}1{]} with some tweaks to add additional data.
-
-\textbf{Input}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(Points \in \langle G \rangle^n\): Sequence of \(n\) points.
-\item
-  \(ad \in \Sigma^*\): Additional data octet-string.
-\end{itemize}
-
-\textbf{Output}:
-
-\begin{itemize}
-\tightlist
-\item
-  \(c \in \mathbb{Z}^*_r\): Challenge scalar.
-\end{itemize}
-
-\textbf{Steps}:
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  \(str\) = \texttt{suite\_string} \(\Vert\) \texttt{0x02}
-\item
-  \textbf{for each} \(P\) \textbf{in} \(Points\): \(str = str \Vert\)
-  \texttt{point\_to\_string(}\(P\)\texttt{)}\$
-\item
-  \(str = str \Vert ad \Vert 0x00\)
-\item
-  \(h =\) \texttt{hash(}\(str\)\texttt{)}
-\item
-  \(h_t = h[0] \Vert .. \Vert h[cLen - 1]\)
-\item
-  \(c =\) \texttt{string\_to\_int(}\(h_t\)\texttt{)}
-\item
-  \textbf{return} \(c\)
-\end{enumerate}
-
-With \texttt{point\_to\_string}, \texttt{string\_to\_int} and
-\texttt{hash} as defined in section 2.1.
 
 \hypertarget{pedersen-vrf}{%
 \section{3. Pedersen VRF}\label{pedersen-vrf}}
@@ -463,27 +451,25 @@ described in section 2.1 of this specification.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(O \leftarrow x \cdot I\)
+  \(O \gets x \cdot I\)
 \item
-  \(k \leftarrow nonce(x, I)\)
+  \(k \gets \texttt{nonce}(x, I)\)
 \item
-  \(k_b \leftarrow nonce(b, I)\)
+  \(k_b \gets \texttt{nonce}(b, I)\)
 \item
-  \(\bar{Y} \leftarrow x \cdot G + b \cdot B\)
+  \(\bar{Y} \gets x \cdot G + b \cdot B\)
 \item
-  \(R \leftarrow k \cdot G + k_b \cdot B\)
+  \(R \gets k \cdot G + k_b \cdot B\)
 \item
-  \(O_k \leftarrow k \cdot I\)
+  \(O_k \gets k \cdot I\)
 \item
-  \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
+  \(c \gets \texttt{challenge}(\bar{Y}, I, O, R, O_k, ad)\)
 \item
-  \(s \leftarrow k + c \cdot x\)
+  \(s \gets k + c \cdot x\)
 \item
-  \(s_b \leftarrow k_b + c \cdot b\)
+  \(s_b \gets k_b + c \cdot b\)
 \item
-  \(\pi \leftarrow (\bar{Y}, R, O_k, s, s_b)\)
-\item
-  \textbf{return} \((O, \pi)\)
+  \(\pi \gets (\bar{Y}, R, O_k, s, s_b)\)
 \end{enumerate}
 
 \hypertarget{verify-1}{%
@@ -509,7 +495,8 @@ described in section 2.1 of this specification.
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise
+  \(\theta \in \{ \top, \bot \}\): \(\top\) if proof is valid, \(\bot\)
+  otherwise.
 \end{itemize}
 
 \textbf{Steps}:
@@ -518,17 +505,15 @@ described in section 2.1 of this specification.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi\)
+  \((\bar{Y}, R, O_k, s, s_b) \gets \pi\)
 \item
-  \(c \leftarrow challenge(\bar{Y}, I, O, R, O_k, ad)\)
+  \(c \gets \texttt{challenge}(\bar{Y}, I, O, R, O_k, ad)\)
 \item
-  \textbf{if} \(O_k + c \cdot O \neq I \cdot s\) \textbf{then}
-  \textbf{return} False
+  \(\theta_0 \gets \top \text{ if } O_k + c \cdot O = I \cdot s \text{ else } \bot\)
 \item
-  \textbf{if} \(R + c \cdot \bar{Y} \neq s \cdot G + s_b \cdot B\)
-  \textbf{then} \textbf{return} False
+  \(\theta_1 \gets \top \text{ if } R + c \cdot \bar{Y} = s \cdot G + s_b \cdot B \text{ else } \bot\)
 \item
-  \textbf{return} True
+  \(\theta = \theta_0 \land \theta_1\)
 \end{enumerate}
 
 \hypertarget{ring-vrf}{%
@@ -655,11 +640,9 @@ padding.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \((O, \pi_p) \leftarrow Pedersen.prove(x, b, k, I, ad)\)
+  \((O, \pi_p) \gets Pedersen.prove(x, b, k, I, ad)\)
 \item
-  \(\pi_r \leftarrow Ring.prove(P, b)\)
-\item
-  \textbf{return} \((O, \pi_p, \pi_r)\)
+  \(\pi_r \gets Ring.prove(P, b)\)
 \end{enumerate}
 
 \hypertarget{verify-2}{%
@@ -690,7 +673,8 @@ padding.
 \begin{itemize}
 \tightlist
 \item
-  True if proof is valid, False otherwise
+  \(\theta \in \{ \top, \bot \}\): \(\top\) if proof is valid, \(\bot\)
+  otherwise.
 \end{itemize}
 
 \textbf{Steps}:
@@ -699,24 +683,20 @@ padding.
 \def\labelenumi{\arabic{enumi}.}
 \tightlist
 \item
-  \(r_p = Pedersen.verify(I, ad, O, \pi_p)\)
+  \(\theta_0 = Pedersen.verify(I, ad, O, \pi_p)\)
 \item
-  \textbf{if} \(r_p \neq True\) \textbf{return} False
+  \((\bar{Y}, R, O_k, s, s_b) \gets \pi_p\)
 \item
-  \((\bar{Y}, R, O_k, s, s_b) \leftarrow \pi_p\)
+  \(\theta_1 = Ring.verify(V, \pi_r, \bar{Y})\)
 \item
-  \(r_r = Ring.verify(V, \pi_r, \bar{Y})\)
-\item
-  \textbf{if} \(r_r \neq True\) \textbf{return} False
-\item
-  \textbf{return} True
+  \(\theta \gets \theta_0 \land \theta_1\)
 \end{enumerate}
 
 \hypertarget{appendix-a}{%
 \section{Appendix A}\label{appendix-a}}
 
 The test vectors in this section were generated using code provided at
-https://github.com/davxy/ark-ec-vrfs.
+\href{https://github.com/davxy/ark-ec-vrfs}{\texttt{https://github.com/davxy/ark-ec-vrfs}}.
 
 \hypertarget{a.1.-ietf-vrf-test-vectors}{%
 \subsection{A.1. IETF VRF Test
