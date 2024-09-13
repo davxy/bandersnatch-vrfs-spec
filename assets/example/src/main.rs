@@ -218,7 +218,7 @@ fn main() {
     let prover_key_index = 3;
 
     // NOTE: any key can be replaced with the padding point
-    let padding_point = ring_context().padding_point().into();
+    let padding_point = Public::from(ring_context().padding_point());
     ring[2] = padding_point;
     ring[7] = padding_point;
 
