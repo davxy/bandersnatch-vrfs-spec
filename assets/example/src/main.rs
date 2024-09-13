@@ -212,13 +212,18 @@ macro_rules! measure_time {
 }
 
 fn main() {
-    let ring_set: Vec<_> = (0..RING_SIZE)
+    let mut ring: Vec<_> = (0..RING_SIZE)
         .map(|i| Secret::from_seed(&i.to_le_bytes()).public())
         .collect();
     let prover_key_index = 3;
 
-    let prover = Prover::new(ring_set.clone(), prover_key_index);
-    let verifier = Verifier::new(ring_set);
+    // NOTE: any key can be replaced with the padding point
+    let padding_point = ring_context().padding_point().into();
+    ring[2] = padding_point;
+    ring[7] = padding_point;
+
+    let prover = Prover::new(ring.clone(), prover_key_index);
+    let verifier = Verifier::new(ring);
 
     let vrf_input_data = b"foo";
 
