@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 9 Sep 2024 - Draft 17
+date: 13 Sep 2024 - Draft 19
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -114,7 +114,7 @@ section 5.5 of [RFC-9381].
   key scalar and $G$ the group generator. In this cipher suite, the secret scalar
   `x` is equal to the secret key `sk`.
 
-- `encode_to_curve_salt` = `pk_string` (i.e. `point_to_string(pk)`).
+- `encode_to_curve_salt` = `""` (no salt)
 
 - The `ECVRF_nonce_generation` function is specified in section 5.4.2.2 of [RFC-9381].
 
@@ -137,9 +137,9 @@ section 5.5 of [RFC-9381].
 - The hash function `hash` is SHA-512 as specified in [RFC-6234] [@RFC6234],
   with `hLen` = 64.
 
-* The `ECVRF_encode_to_curve` function uses *Elligator2* method described in
-  section 6.8.2 of [RFC-9380] and is described in section 5.4.1.2 of
-  [RFC-9381], with `h2c_suite_ID_string` = `"Bandersnatch_XMD:SHA-512_ELL2_RO_"`
+* The `ECVRF_encode_to_curve` function uses *Elligator2* method as described in
+  section 6.8.2 of [RFC-9380] and in section 5.4.1.2 of [RFC-9381], with
+  parametrized with `h2c_suite_ID_string` = `"Bandersnatch_XMD:SHA-512_ELL2_RO_"`
   and domain separation tag `DST = "ECVRF_"` $\Vert$ `h2c_suite_ID_string` $\Vert$ `suite_string`.
 
 ## 2.2. Prove
@@ -293,18 +293,25 @@ instance the concrete scheme.
   - KZG with SRS derived from [Zcash](https://zfnd.org/conclusion-of-the-powers-of-tau-ceremony) powers of tau ceremony.
 
 - **Fiat-Shamir Transform**
-  - [`merlin`](https://merlin.cool) library implementation.
-  - Begin with empty transcript with empty label.
+  - [`ark-transcript`](https://crates.io/crates/ark-transcript).
+  - Begin with empty transcript and "ring-proof" label.
   - Push $R$ to the transcript after instancing.
   - TODO: Specify the order and how parameters are added to the transcript as we progress the protocol.
 
-- Accumulator seed point (Twisted Edwards form):
+- Accumulator seed point in Twisted Edwards form:
 $$_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
 $$_{\text{S}_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}$$
 
-- Padding point (Twisted Edwards form):
+  - Compressed: $_{\texttt{0x63c8bc15a50fb4281b9a50a37cbde791377ebe5a7cde71fd7ee545d1f0230a42}}$
+
+- Padding point in Twisted Edwards form:
 $$_{\square_x = 5259734940318236869621856335705224150406219599146660415951585879123115970561}$$
 $$_{\square_y = 23297815351169973518610888463679675079080900957871871916328881498043316508082}$$
+
+  - Compressed: $_{\texttt{0xb215b5390d86b943e68ffb809259cee98282023522a8162a8db23cfb9f188233}}$
+
+  A point with unknown discrete logarithm derived using the `ECVRF_encode_to_curve` function
+  as described in IETF suite [Configuration] section with input the string: `"ring-proof-pad"`.
 
 - Polynomials domain ($\langle \omega \rangle = \mathbb{D}$) generator:
 $$_{\omega = 49307615728544765012166121802278658070711169839041683575071795236746050763237}$$

@@ -74,7 +74,7 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{9 Sep 2024 - Draft 17}
+\date{13 Sep 2024 - Draft 19}
 
 \begin{document}
 \maketitle
@@ -235,8 +235,7 @@ guidelines defined in section 5.5 of
   cipher suite, the secret scalar \texttt{x} is equal to the secret key
   \texttt{sk}.
 \item
-  \texttt{encode\_to\_curve\_salt} = \texttt{pk\_string}
-  (i.e.~\texttt{point\_to\_string(pk)}).
+  \texttt{encode\_to\_curve\_salt} = \texttt{""} (no salt)
 \item
   The \texttt{ECVRF\_nonce\_generation} function is specified in section
   5.4.2.2 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}.
@@ -267,11 +266,11 @@ guidelines defined in section 5.5 of
   with \texttt{hLen} = 64.
 \item
   The \texttt{ECVRF\_encode\_to\_curve} function uses \emph{Elligator2}
-  method described in section 6.8.2 of
-  \href{https://datatracker.ietf.org/doc/rfc9380}{RFC-9380} and is
-  described in section 5.4.1.2 of
+  method as described in section 6.8.2 of
+  \href{https://datatracker.ietf.org/doc/rfc9380}{RFC-9380} and in
+  section 5.4.1.2 of
   \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}, with
-  \texttt{h2c\_suite\_ID\_string} =
+  parametrized with \texttt{h2c\_suite\_ID\_string} =
   \texttt{"Bandersnatch\_XMD:SHA-512\_ELL2\_RO\_"} and domain separation
   tag \texttt{DST\ =\ "ECVRF\_"} \(\Vert\)
   \texttt{h2c\_suite\_ID\_string} \(\Vert\) \texttt{suite\_string}.
@@ -561,9 +560,9 @@ instance the concrete scheme.
   \begin{itemize}
   \tightlist
   \item
-    \href{https://merlin.cool}{\texttt{merlin}} library implementation.
+    \href{https://crates.io/crates/ark-transcript}{\texttt{ark-transcript}}.
   \item
-    Begin with empty transcript with empty label.
+    Begin with empty transcript and ``ring-proof'' label.
   \item
     Push \(R\) to the transcript after instancing.
   \item
@@ -571,13 +570,32 @@ instance the concrete scheme.
     transcript as we progress the protocol.
   \end{itemize}
 \item
-  Accumulator seed point (Twisted Edwards form):
+  Accumulator seed point in Twisted Edwards form:
   \[_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}\]
   \[_{\text{S}_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}\]
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Compressed:
+    \(_{\texttt{0x63c8bc15a50fb4281b9a50a37cbde791377ebe5a7cde71fd7ee545d1f0230a42}}\)
+  \end{itemize}
 \item
-  Padding point (Twisted Edwards form):
+  Padding point in Twisted Edwards form:
   \[_{\square_x = 5259734940318236869621856335705224150406219599146660415951585879123115970561}\]
   \[_{\square_y = 23297815351169973518610888463679675079080900957871871916328881498043316508082}\]
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Compressed:
+    \(_{\texttt{0xb215b5390d86b943e68ffb809259cee98282023522a8162a8db23cfb9f188233}}\)
+  \end{itemize}
+
+  A point with unknown discrete logarithm derived using the
+  \texttt{ECVRF\_encode\_to\_curve} function as described in IETF suite
+  {[}Configuration{]} section with input the string:
+  \texttt{"ring-proof-pad"}.
 \item
   Polynomials domain (\(\langle \omega \rangle = \mathbb{D}\))
   generator:
