@@ -1,18 +1,17 @@
 //! Padding point generation
 
 use ark_ec_vrfs::{
-    prelude::{ark_ec::AffineRepr, ark_std},
+    prelude::{ark_ec::AffineRepr, ark_ff::PrimeField},
     suites::bandersnatch::{edwards as bandersnatch_ed, weierstrass as bandersnatch_sw},
     utils::{sw_to_te, te_to_sw},
 };
-use ark_std::{rand::SeedableRng, UniformRand};
 use blake2::Digest;
 
 fn print_point<T: AffineRepr>(name: &str, pt: T) {
     println!("====================================");
-    println!("{name}.X = {}", pt.x().unwrap());
-    println!("{name}.Y = {}", pt.y().unwrap());
-
+    println!("{name}");
+    println!("X = {}", pt.x().unwrap());
+    println!("Y = {}", pt.y().unwrap());
     let mut buf = Vec::new();
     pt.serialize_compressed(&mut buf).unwrap();
     println!("encoded: 0x{}", hex::encode(buf));
@@ -20,19 +19,20 @@ fn print_point<T: AffineRepr>(name: &str, pt: T) {
 
 fn main() {
     println!("====================================");
-    const SEED_STRING: &str = "w3f/ring-proof/common/padding";
-    println!("Seed string: {}", SEED_STRING);
+    const SEED_STRING: &[u8] = b"/w3f/ring-proof/padding\x00";
+    println!("Seed string: '{}'", hex::encode(SEED_STRING));
 
-    let seed: [u8; 32] = blake2::Blake2s::digest(SEED_STRING.as_bytes()).into();
+    let seed: [u8; 64] = blake2::Blake2b::digest(SEED_STRING).into();
     println!("Seed hash = {}", hex::encode(seed));
 
-    let mut rng = rand_chacha::ChaCha12Rng::from_seed(seed);
-
-    let sw_point = bandersnatch_sw::AffinePoint::rand(&mut rng);
-    print_point("SW padding point", sw_point.clone());
+    let x = bandersnatch_sw::BaseField::from_le_bytes_mod_order(&seed);
+    let sw_point = bandersnatch_sw::AffinePoint::get_point_from_x_unchecked(x, false)
+        .unwrap()
+        .clear_cofactor();
+    print_point("SW-padding", sw_point);
 
     let ed_point = sw_to_te(&sw_point).unwrap();
-    print_point("TE padding", ed_point);
+    print_point("TE-padding", ed_point);
 
     let sw_point2 = te_to_sw(&ed_point).unwrap();
     assert_eq!(sw_point, sw_point2);
