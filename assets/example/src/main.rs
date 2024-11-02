@@ -1,7 +1,8 @@
+use ark_ec_vrfs::ring::RingSuite;
 use ark_ec_vrfs::suites::bandersnatch::edwards as bandersnatch;
 use ark_ec_vrfs::{prelude::ark_serialize, suites::bandersnatch::edwards::RingContext};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use bandersnatch::{IetfProof, Input, Output, Public, RingProof, Secret};
+use bandersnatch::{BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof, Secret};
 
 const RING_SIZE: usize = 1023;
 
@@ -106,7 +107,7 @@ impl Prover {
     }
 }
 
-type RingCommitment = ark_ec_vrfs::ring::RingCommitment<bandersnatch::BandersnatchSha512Ell2>;
+type RingCommitment = ark_ec_vrfs::ring::RingCommitment<BandersnatchSha512Ell2>;
 
 // Verifier actor.
 struct Verifier {
@@ -218,7 +219,7 @@ fn main() {
     let prover_key_index = 3;
 
     // NOTE: any key can be replaced with the padding point
-    let padding_point = Public::from(ring_context().padding_point());
+    let padding_point = Public::from(BandersnatchSha512Ell2::PADDING);
     ring[2] = padding_point;
     ring[7] = padding_point;
 

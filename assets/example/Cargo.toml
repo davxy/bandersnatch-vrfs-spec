@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "e491b41", features = ["bandersnatch", "ring", "parallel"] }
+ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "56d554c", features = ["bandersnatch", "ring"] }
 hex = "0.4.3"
 
 # Deterministic ring proof.
