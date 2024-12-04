@@ -1,8 +1,0 @@
-[package]
-name = "padding-point-generator"
-version = "0.2.0"
-edition = "2021"
-
-[dependencies]
-ark-ec-vrfs ={ git = "https://github.com/davxy/ark-ec-vrfs", rev = "f6e80d3", features = ["bandersnatch", "ring"] }
-hex = "0.4.3"

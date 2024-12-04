@@ -1,4 +1,3 @@
-use ark_ec_vrfs::ring::RingSuite;
 use ark_ec_vrfs::suites::bandersnatch::edwards as bandersnatch;
 use ark_ec_vrfs::{prelude::ark_serialize, suites::bandersnatch::edwards::RingContext};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
@@ -219,7 +218,7 @@ fn main() {
     let prover_key_index = 3;
 
     // NOTE: any key can be replaced with the padding point
-    let padding_point = Public::from(BandersnatchSha512Ell2::PADDING);
+    let padding_point = Public::from(ring_context().padding_point());
     ring[2] = padding_point;
     ring[7] = padding_point;
 
