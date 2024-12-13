@@ -216,7 +216,7 @@ macro_rules! measure_time {
 }
 
 fn print_point(name: &str, p: AffinePoint) {
-    println!("-----------------------------");
+    println!("------------------------------");
     println!("[{name}]");
     println!("X: {}", p.x);
     println!("Y: {}", p.y);
@@ -226,15 +226,16 @@ fn print_point(name: &str, p: AffinePoint) {
 }
 
 fn print_points() {
+    println!("==============================");
     print_point("Group Base", AffinePoint::generator());
     print_point("Blinding Base", BandersnatchSha512Ell2::BLINDING_BASE);
     print_point("Ring Padding", ring_context().padding_point());
     print_point("Accumulator Base", BandersnatchSha512Ell2::ACCUMULATOR_BASE);
+    println!("==============================");
 }
 
 fn main() {
     print_points();
-    return;
 
     let mut ring: Vec<_> = (0..RING_SIZE)
         .map(|i| Secret::from_seed(&i.to_le_bytes()).public())
