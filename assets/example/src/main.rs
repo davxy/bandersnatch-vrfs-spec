@@ -1,7 +1,11 @@
-use ark_ec_vrfs::suites::bandersnatch::edwards as bandersnatch;
+use ark_ec_vrfs::prelude::ark_ec::AffineRepr;
+use ark_ec_vrfs::ring::RingSuite;
+use ark_ec_vrfs::{pedersen::PedersenSuite, suites::bandersnatch::edwards as bandersnatch};
 use ark_ec_vrfs::{prelude::ark_serialize, suites::bandersnatch::edwards::RingContext};
 use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
-use bandersnatch::{BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof, Secret};
+use bandersnatch::{
+    AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof, Secret,
+};
 
 const RING_SIZE: usize = 1023;
 
@@ -211,7 +215,27 @@ macro_rules! measure_time {
     }};
 }
 
+fn print_point(name: &str, p: AffinePoint) {
+    println!("-----------------------------");
+    println!("[{name}]");
+    println!("X: {}", p.x);
+    println!("Y: {}", p.y);
+    let mut buf = Vec::new();
+    p.serialize_compressed(&mut buf).unwrap();
+    println!("Compressed: 0x{}", hex::encode(buf));
+}
+
+fn print_points() {
+    print_point("Group Base", AffinePoint::generator());
+    print_point("Blinding Base", BandersnatchSha512Ell2::BLINDING_BASE);
+    print_point("Ring Padding", ring_context().padding_point());
+    print_point("Accumulator Base", BandersnatchSha512Ell2::ACCUMULATOR_BASE);
+}
+
 fn main() {
+    print_points();
+    return;
+
     let mut ring: Vec<_> = (0..RING_SIZE)
         .map(|i| Secret::from_seed(&i.to_le_bytes()).public())
         .collect();
