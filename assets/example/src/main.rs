@@ -65,6 +65,13 @@ impl Prover {
         }
     }
 
+    /// VRF output hash.
+    pub fn vrf_output(&self, vrf_input_data: &[u8]) -> Vec<u8> {
+        let input = vrf_input_point(vrf_input_data);
+        let output = self.secret.output(input);
+        output.hash()[..32].try_into().unwrap()
+    }
+
     /// Anonymous VRF signature.
     ///
     /// Used for tickets submission.
@@ -263,7 +270,7 @@ fn main() {
     };
 
     // Verifier checks it without knowing who is the signer.
-    let ring_vrf_output = measure_time! {
+    let ring_vrf_output_hash = measure_time! {
         "ring-vrf-verify",
         verifier.ring_vrf_verify(vrf_input_data, aux_data, &ring_signature).unwrap()
     };
@@ -280,11 +287,15 @@ fn main() {
     };
 
     // Verifier checks the signature knowing the signer identity.
-    let ietf_vrf_output = measure_time! {
+    let ietf_vrf_output_hash = measure_time! {
         "ietf-vrf-verify",
         verifier.ietf_vrf_verify(vrf_input_data, other_aux_data, &ietf_signature, prover_key_index).unwrap()
     };
 
     // Must match
-    assert_eq!(ring_vrf_output, ietf_vrf_output);
+    assert_eq!(ring_vrf_output_hash, ietf_vrf_output_hash);
+
+    // We don't need to produce a signature to get the vrf output
+    let vrf_output_hash = prover.vrf_output(vrf_input_data);
+    assert_eq!(vrf_output_hash, ietf_vrf_output_hash);
 }
