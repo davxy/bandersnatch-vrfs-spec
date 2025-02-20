@@ -236,7 +236,7 @@ fn print_points() {
     println!("==============================");
     print_point("Group Base", AffinePoint::generator());
     print_point("Blinding Base", BandersnatchSha512Ell2::BLINDING_BASE);
-    print_point("Ring Padding", ring_context().padding_point());
+    print_point("Ring Padding", RingContext::padding_point());
     print_point("Accumulator Base", BandersnatchSha512Ell2::ACCUMULATOR_BASE);
     println!("==============================");
 }
@@ -250,7 +250,7 @@ fn main() {
     let prover_key_index = 3;
 
     // NOTE: any key can be replaced with the padding point
-    let padding_point = Public::from(ring_context().padding_point());
+    let padding_point = Public::from(RingContext::padding_point());
     ring[2] = padding_point;
     ring[7] = padding_point;
 
