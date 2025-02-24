@@ -236,7 +236,7 @@ fn print_points() {
     println!("==============================");
     print_point("Group Base", AffinePoint::generator());
     print_point("Blinding Base", BandersnatchSha512Ell2::BLINDING_BASE);
-    print_point("Ring Padding", RingContext::padding_point());
+    print_point("Ring Padding", BandersnatchSha512Ell2::PADDING);
     print_point("Accumulator Base", BandersnatchSha512Ell2::ACCUMULATOR_BASE);
     println!("==============================");
 }
