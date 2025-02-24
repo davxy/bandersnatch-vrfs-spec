@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 20 Feb 2025 - Draft 25
+date: 24 Feb 2025 - Draft 25
 ---
 
 \newcommand{\G}{\langle G \rangle}
@@ -219,10 +219,10 @@ generation procedure.
 Pedersen VRF is configured for prime subgroup $\G$ of Bandersnatch elliptic
 curve $E$, in Twisted Edwards form, defined in [MSZ21] [@MSZ21] with *blinding base*
 $B \in \G$ defined as follows:
-$$_{B_x = 14576224270591906826192118712803723445031237947873156025406837473427562701854}$$
-$$_{B_y = 38436873314098705092845609371301773715650206984323659492499960072785679638442}$$
+$$_{B_x = 6150229251051246713677296363717454238956877613358614224171740096471278798312}$$
+$$_{B_y = 28442734166467795856797249030329035618871580593056783094884474814923353898473}$$
 
-  - Compressed: $_{\texttt{0xaa5f60f3b3126fa406972d2023ee03bf281022209d13882199113619d57ffa54}}$
+  - Compressed: $_{\texttt{0xe93da06b869766b158d20b843ec648cc68e0b7ba2f7083acf0f154205d04e23e}}$
 
 For all the other configurable parameters and external functions we adhere as
 much as possible to the Bandersnatch cipher suite for IETF VRF described in
@@ -303,16 +303,16 @@ instance the concrete scheme.
   - TODO: Specify the order and how parameters are added to the transcript as we progress the protocol.
 
 - Accumulator seed point in Twisted Edwards form:
-$$_{\text{S}_x = 3955725774225903122339172568337849452553276548604445833196164961773358506589}$$
-$$_{\text{S}_y = 29870564530691725960104983716673293929719207405660860235233811770612192692323}$$
+$$_{\text{S}_x = 37805570861274048643170021838972902516980894313648523898085159469000338764576}$$
+$$_{\text{S}_y = 14738305321141000190236674389841754997202271418876976886494444739226156422510}$$
 
-  - Compressed: $_{\texttt{0x63c8bc15a50fb4281b9a50a37cbde791377ebe5a7cde71fd7ee545d1f0230a42}}$
+  - Compressed: $_{\texttt{0x6e5574f9077fb76c885c36196a832dbadd64142d305be5487724967acf9595a0}}$
 
 - Padding point in Twisted Edwards form:
-$$_{\square_x = 23942223917106120326220291257397678561637131227432899006603244452561725937075}$$
-$$_{\square_y = 1605027200774560580022502723165578671697794116420567297367317898913080293877}$$
+$$_{\square_x = 26287722405578650394504321825321286533153045350760430979437739593351290020913}$$
+$$_{\square_y = 19058981610000167534379068105702216971787064146691007947119244515951752366738}$$
 
-  - Compressed: $_{\texttt{0xf5399e03f2121ff4c5d33386cdc66d56a6c5132b739f753442f7bda6c7698c03}}$
+  - Compressed: $_{\texttt{0x92ca79e61dd90c1573a8693f199bf6e1e86835cc715cdcf93f5ef222560023aa}}$
 
   A point with unknown discrete logarithm derived using the `ECVRF_encode_to_curve` function
   as described in IETF suite [Configuration] section with input the string: `"ring-proof-pad"`.
