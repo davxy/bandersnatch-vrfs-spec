@@ -1,10 +1,12 @@
-use ark_ec_vrfs::prelude::ark_ec::AffineRepr;
+use ark_ec_vrfs::reexports::{
+    ark_ec::AffineRepr,
+    ark_serialize::{self, CanonicalDeserialize, CanonicalSerialize},
+};
 use ark_ec_vrfs::ring::RingSuite;
-use ark_ec_vrfs::{pedersen::PedersenSuite, suites::bandersnatch::edwards as bandersnatch};
-use ark_ec_vrfs::{prelude::ark_serialize, suites::bandersnatch::edwards::RingContext};
-use ark_serialize::{CanonicalDeserialize, CanonicalSerialize};
+use ark_ec_vrfs::{pedersen::PedersenSuite, suites::bandersnatch};
 use bandersnatch::{
-    AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof, Secret,
+    AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingContext, RingProof,
+    Secret,
 };
 
 const RING_SIZE: usize = 1023;
