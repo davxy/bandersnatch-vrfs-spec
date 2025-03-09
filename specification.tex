@@ -118,20 +118,6 @@ BLS12-381 scalar field specified in
 
 \section{1. Preliminaries}\label{preliminaries}
 
-\textbf{Definition}: A \emph{verifiable random function with additional
-data (VRF-AD)} can be described by two functions:
-
-\begin{itemize}
-\item
-  \(Prove(sk,in,ad) \mapsto (out,\pi)\) : from secret key \(sk\), input
-  \(in\), and additional data \(ad\) returns a verifiable output \(out\)
-  and proof \(\pi\).
-\item
-  \(Verify(pk,in,ad,out,\pi) \mapsto (\top|\bot)\) : for public key
-  \(pk\), input \(in\), additional data \(ad\), output \(out\) and proof
-  \(\pi\) returns either \(\top\) on success or \(\bot\) on failure.
-\end{itemize}
-
 \subsection{1.1. Common definitions}\label{common-definitions}
 
 \begin{itemize}
@@ -196,7 +182,34 @@ An arbitrary length octet-string provided by the user to be signed
 together with the generated VRF output. This data doesn't influence the
 produced VRF output.
 
-\subsection{1.6. Challenge Procedure}\label{challenge-procedure}
+\subsection{1.6. VRF-AD}\label{vrf-ad}
+
+A \emph{verifiable random function with additional data (VRF-AD)} can be
+described by three functions:
+
+\begin{itemize}
+\tightlist
+\item
+  \(prove(x, i, ad) \mapsto \Pi\)
+\item
+  \(verify(y, i, ad, \Pi) \mapsto (\top|\bot)\)
+\item
+  \(output(\Pi) \mapsto o\)
+\end{itemize}
+
+Where:
+
+\begin{itemize}
+\tightlist
+\item
+  \(y \gets \texttt{serialize\_compressed}(Y)\)
+\item
+  \(\Pi \gets \texttt{encode\_compressed}((O, \pi))\)
+\item
+  \(\pi\): specific scheme proof
+\end{itemize}
+
+\subsection{1.7. Challenge Procedure}\label{challenge-procedure}
 
 Challenge construction mostly follows the procedure given in section
 5.4.3 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}

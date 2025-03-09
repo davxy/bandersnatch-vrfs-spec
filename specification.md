@@ -28,16 +28,6 @@ specified in [MSZ21] [@MSZ21].
 
 # 1. Preliminaries
 
-**Definition**: A *verifiable random function with additional data (VRF-AD)*
-can be described by two functions:
-
-- $Prove(sk,in,ad) \mapsto (out,\pi)$ : from secret key $sk$, input $in$,
-  and additional data $ad$ returns a verifiable output $out$ and proof $\pi$.
-
-- $Verify(pk,in,ad,out,\pi) \mapsto (\top|\bot)$ : for public key $pk$, input $in$,
-  additional data $ad$, output $out$ and proof $\pi$ returns either $\top$ on success
-  or $\bot$ on failure.
-
 ## 1.1. Common definitions
 
 - $\F$: Scalar field with prime order.
@@ -85,7 +75,22 @@ $$o \gets \texttt{output\_to\_hash}(O)$$
 An arbitrary length octet-string provided by the user to be signed together with
 the generated VRF output. This data doesn't influence the produced VRF output.
 
-## 1.6. Challenge Procedure
+## 1.6. VRF-AD
+
+A *verifiable random function with additional data (VRF-AD)* can be described by
+three functions:
+
+- $prove(x, i, ad) \mapsto \Pi$
+- $verify(y, i, ad, \Pi) \mapsto (\top|\bot)$
+- $output(\Pi) \mapsto o$
+
+Where:
+
+- $y \gets \texttt{serialize\_compressed}(Y)$
+- $\Pi \gets \texttt{encode\_compressed}((O, \pi))$
+- $\pi$: specific scheme proof
+
+## 1.7. Challenge Procedure
 
 Challenge construction mostly follows the procedure given in section 5.4.3 of
 [RFC-9381] [@RFC9381] with some tweaks to add additional data.
