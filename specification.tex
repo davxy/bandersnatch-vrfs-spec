@@ -87,13 +87,14 @@
 
 \title{Bandersnatch VRF-AD Specification}
 \author{Davide Galassi \and Seyed Hosseini}
-\date{24 Feb 2025 - Draft 25}
+\date{9 Mar 2025 - Draft 26}
 
 \begin{document}
 \maketitle
 
-\newcommand{\G}{\langle G \rangle}
-\newcommand{\F}{\mathbb{Z}^*_r}
+\newcommand{\G}{\bold{G}}
+\newcommand{\F}{\bold{F}}
+\newcommand{\S}{\bold{\Sigma}}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -118,7 +119,7 @@ BLS12-381 scalar field specified in
 \section{1. Preliminaries}\label{preliminaries}
 
 \textbf{Definition}: A \emph{verifiable random function with additional
-data (VRF-AD)} can be described with two functions:
+data (VRF-AD)} can be described by two functions:
 
 \begin{itemize}
 \item
@@ -126,35 +127,68 @@ data (VRF-AD)} can be described with two functions:
   \(in\), and additional data \(ad\) returns a verifiable output \(out\)
   and proof \(\pi\).
 \item
-  \(Verify(pk,in,ad,out,\pi) \mapsto (0|1)\) : for public key \(pk\),
-  input \(in\), additional data \(ad\), output \(out\) and proof \(\pi\)
-  returns either \(1\) on success or \(0\) on failure.
+  \(Verify(pk,in,ad,out,\pi) \mapsto (\top|\bot)\) : for public key
+  \(pk\), input \(in\), additional data \(ad\), output \(out\) and proof
+  \(\pi\) returns either \(\top\) on success or \(\bot\) on failure.
 \end{itemize}
 
-\subsection{1.1. VRF Input}\label{vrf-input}
+\subsection{1.1. Common definitions}\label{common-definitions}
 
-An arbitrary length octet-string provided by the user and used to
-generate some unbiasable verifiable random output.
+\begin{itemize}
+\item
+  \(\bold{F}\): Scalar field with prime order.
+\item
+  \(\bold{G}\): Bandersnatch curve with order \(|\bold{F}|\).
+\item
+  \(\bold{\Sigma}^k\): Octets strings with length \(k \in \mathbb{N}\)
+  (\(*\) for arbitrary length).
+\item
+  \(G \in \bold{G}\): Prime subgroup generator point.
+\item
+  \(x \in \bold{F}\): Secret key scalar.
+\item
+  \(Y \gets x \cdot G \in \bold{G}\): Public key point.
+\item
+  \(i \in \bold{\Sigma}^*\): VRF input data.
+\item
+  \(I \in \bold{G}\): VRF input point.
+\item
+  \(O \in \bold{G}\): VRF output point.
+\item
+  \(o \in \bold{\Sigma}^k\): VRF output hash.
+\end{itemize}
 
-\subsection{1.2. VRF Input Point}\label{vrf-input-point}
+\subsection{1.2. VRF Input}\label{vrf-input}
 
-A point in \(\langle G \rangle\) generated from VRF input octet-string
-using the \emph{Elligator 2} \emph{hash-to-curve} algorithm as described
-by section 6.8.2 of
+An arbitrary length octet-string provided by the user to generate some
+unbiasable verifiable random output.
+
+\subsection{1.3. VRF Input Point}\label{vrf-input-point}
+
+A point in \(\bold{G}\) generated from VRF input octet-string using the
+\emph{Elligator 2} \emph{hash-to-curve} algorithm as described by
+section 6.8.2 of
 \href{https://datatracker.ietf.org/doc/rfc9380}{RFC-9380} {[}5{]}.
 
-\subsection{1.3. VRF Output Point}\label{vrf-output-point}
+\[I \gets \texttt{hash\_to\_curve}(i)\]
 
-A point in \(\langle G \rangle\) generated from VRF input point as:
-\(Output \gets sk \cdot Input\).
+\subsection{1.4. VRF Output Point}\label{vrf-output-point}
+
+A point generated from VRF input point and secret key scalar.
+
+\[O \gets x \cdot I\]
 
 \subsection{1.4. VRF Output}\label{vrf-output}
 
-A fixed length octet-string generated from VRF output point using the
-proof-to-hash procedure defined in section 5.2 of
-\href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}.
+A fixed-length octet string produced from the VRF output point using the
+\emph{output-to-hash} procedure, which is \emph{proof-to-hash} method
+described in Section 5.2 of
+\href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}, but with a
+specific focus on the output point component (referred to as \(Gamma\)
+in \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}) extracted
+from the output point proof bundle.
 
-The first 32 bytes of the hash output are taken.
+\[o \gets \texttt{output\_to\_hash}(O)\]
 
 \subsection{1.5 Additional Data}\label{additional-data}
 
@@ -173,9 +207,9 @@ Challenge construction mostly follows the procedure given in section
 \begin{itemize}
 \tightlist
 \item
-  \(\bar{P} \in \langle G \rangle^n\): Sequence of \(n\) points.
+  \(\bar{P} \in \bold{G}^n\): Sequence of \(n\) points.
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -183,7 +217,7 @@ Challenge construction mostly follows the procedure given in section
 \begin{itemize}
 \tightlist
 \item
-  \(c \in \mathbb{Z}^*_r\): Challenge scalar.
+  \(c \in \bold{F}\): Challenge scalar.
 \end{itemize}
 
 \textbf{Steps}:
@@ -220,14 +254,13 @@ guidelines defined in section 5.5 of
 \item
   \texttt{suite\_string} = \texttt{"Bandersnatch\_SHA-512\_ELL2"}.
 \item
-  The EC group \(\langle G \rangle\) is the prime subgroup of the
-  Bandersnatch elliptic curve, in Twisted Edwards form, with finite
-  field and curve parameters as specified in
+  The EC group \(\bold{G}\) is the prime subgroup of the Bandersnatch
+  elliptic curve, in Twisted Edwards form, with finite field and curve
+  parameters as specified in
   \href{https://eprint.iacr.org/2021/1152}{MSZ21}. For this group,
   \texttt{fLen} = \texttt{qLen} = \(32\) and \texttt{cofactor} = \(4\).
 \item
-  The prime subgroup generator \(G \in \langle G \rangle\) is defined as
-  follows:
+  The prime subgroup generator \(G \in \bold{G}\) is defined as follows:
   \[_{G_x = 18886178867200960497001835917649091219057080094937609519140440539760939937304}\]
   \[_{G_y = 19188667384257783945677642223292697773471335439753913231509108946878080696678}\]
 
@@ -250,26 +283,25 @@ guidelines defined in section 5.5 of
   The \texttt{ECVRF\_nonce\_generation} function is specified in section
   5.4.2.2 of \href{https://datatracker.ietf.org/doc/rfc9381}{RFC-9381}.
 \item
-  The \texttt{int\_to\_string} function encodes into the 32 bytes little
-  endian representation.
+  The \texttt{int\_to\_string} function encodes into the 32 octets
+  little endian representation.
 \item
-  The \texttt{string\_to\_int} function decodes from the 32 bytes little
-  endian representation eventually reducing modulo the prime field
-  order.
+  The \texttt{string\_to\_int} function decodes from the 32 octets
+  little endian representation eventually reducing modulo the prime
+  field order.
 \item
   The \texttt{point\_to\_string} function converts a point in
-  \(\langle G \rangle\) to an octet-string using compressed form. The
-  \(y\) coordinate is encoded using \texttt{int\_to\_string} function
-  and the most significant bit of the last octet is used to keep track
-  of \(x\) sign. This implies that \texttt{ptLen\ =\ flen\ =\ 32}.
+  \(\bold{G}\) to an octet-string using compressed form. The \(y\)
+  coordinate is encoded using \texttt{int\_to\_string} function and the
+  most significant bit of the last octet is used to keep track of \(x\)
+  sign. This implies that \texttt{ptLen\ =\ flen\ =\ 32}.
 \item
   The \texttt{string\_to\_point} function converts an octet-string to a
-  point on \(\langle G \rangle\). The string most significant bit is
-  removed to recover the \(x\) coordinate as function of \(y\), which is
-  first decoded from the rest of the string using
-  \texttt{int\_to\_string} procedure. This function MUST outputs
-  ``INVALID'' if the octet-string does not decode to a point on the
-  prime subgroup \(\langle G \rangle\).
+  point on \(\bold{G}\). The string most significant bit is removed to
+  recover the \(x\) coordinate as function of \(y\), which is first
+  decoded from the rest of the string using \texttt{int\_to\_string}
+  procedure. This function MUST outputs ``INVALID'' if the octet-string
+  does not decode to a point on the prime subgroup \(\bold{G}\).
 \item
   The hash function \texttt{hash} is SHA-512 as specified in
   \href{https://datatracker.ietf.org/doc/rfc6234}{RFC-6234} {[}6{]},
@@ -293,11 +325,11 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  \(x \in \mathbb{Z}^*_r\): Secret key
+  \(x \in \bold{F}\): Secret key
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \bold{G}\): VRF input point
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -305,9 +337,9 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  \(O \in \langle G \rangle\): VRF output point
+  \(O \in \bold{G}\): VRF output point
 \item
-  \(\pi \in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\): Schnorr-like proof
+  \(\pi \in (\bold{F}, \bold{F})\): Schnorr-like proof
 \end{itemize}
 
 \textbf{Steps}:
@@ -347,15 +379,15 @@ guidelines defined in section 5.5 of
 \begin{itemize}
 \tightlist
 \item
-  \(Y \in \langle G \rangle\): Public key
+  \(Y \in \bold{G}\): Public key
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \bold{G}\): VRF input point
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \item
-  \(O \in \langle G \rangle\): VRF output point
+  \(O \in \bold{G}\): VRF output point
 \item
-  \(\pi \in (\mathbb{Z}^*_r, \mathbb{Z}^*_r)\): Schnorr-like proof
+  \(\pi \in (\bold{F}, \bold{F})\): Schnorr-like proof
 \end{itemize}
 
 \textbf{Output}:
@@ -411,10 +443,10 @@ generation procedure.
 
 \subsection{3.1. Configuration}\label{configuration-1}
 
-Pedersen VRF is configured for prime subgroup \(\langle G \rangle\) of
+Pedersen VRF is configured for prime subgroup \(\bold{G}\) of
 Bandersnatch elliptic curve \(E\), in Twisted Edwards form, defined in
 \href{https://eprint.iacr.org/2021/1152}{MSZ21} {[}4{]} with
-\emph{blinding base} \(B \in \langle G \rangle\) defined as follows:
+\emph{blinding base} \(B \in \bold{G}\) defined as follows:
 \[_{B_x = 6150229251051246713677296363717454238956877613358614224171740096471278798312}\]
 \[_{B_y = 28442734166467795856797249030329035618871580593056783094884474814923353898473}\]
 
@@ -436,13 +468,13 @@ described in section 2.1 of this specification.
 \begin{itemize}
 \tightlist
 \item
-  \(x \in \mathbb{Z}^*_r\): Secret key
+  \(x \in \bold{F}\): Secret key
 \item
-  \(b \in \mathbb{Z}^*_r\): Secret blinding factor
+  \(b \in \bold{F}\): Secret blinding factor
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \bold{G}\): VRF input point
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -450,9 +482,9 @@ described in section 2.1 of this specification.
 \begin{itemize}
 \tightlist
 \item
-  \(O \in \langle G \rangle\): VRF output point
+  \(O \in \bold{G}\): VRF output point
 \item
-  \(\pi \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  \(\pi \in (\bold{G}, \bold{G}, \bold{G}, \bold{F}, \bold{F})\):
   Pedersen proof
 \end{itemize}
 
@@ -490,13 +522,13 @@ described in section 2.1 of this specification.
 \begin{itemize}
 \tightlist
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \bold{G}\): VRF input point
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \item
-  \(O \in \langle G \rangle\): VRF output point
+  \(O \in \bold{G}\): VRF output point
 \item
-  \(\pi \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  \(\pi \in (\bold{G}, \bold{G}, \bold{G}, \bold{F}, \bold{F})\):
   Pedersen proof
 \end{itemize}
 
@@ -613,18 +645,6 @@ instance the concrete scheme.
   \(|\mathbb{D}| = 2048\)
 \end{itemize}
 
-\subsubsection{4.1.1. Short Weierstrass Form
-Requirement}\label{short-weierstrass-form-requirement}
-
-The Ring-Proof scheme, as outlined in
-\href{https://github.com/davxy/ring-proof-spec}{VG24}, mandates that all
-points must be in Short Weierstrass form. Therefore, any point used in
-this scheme, whether derived from Twisted Edwards form or otherwise,
-must first be converted to Short Weierstrass form. This requirement
-applies to both user-related values, such as the ring points used by the
-ring public keys, and to configuration points like the accumulator and
-padding.
-
 \subsection{4.2. Prove}\label{prove-2}
 
 \textbf{Input}:
@@ -632,17 +652,17 @@ padding.
 \begin{itemize}
 \tightlist
 \item
-  \(x \in \mathbb{Z}^*_r\): Secret key
+  \(x \in \bold{F}\): Secret key
 \item
   \(P \in ?\): Ring prover
 \item
   \(k \in \mathbb{N}_k\): prover public key position within the ring
 \item
-  \(b \in \mathbb{Z}^*_r\): Secret blinding factor
+  \(b \in \bold{F}\): Secret blinding factor
 \item
-  \(I \in \langle G \rangle\): VRF input point
+  \(I \in \bold{G}\): VRF input point
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \end{itemize}
 
 \textbf{Output}:
@@ -650,13 +670,13 @@ padding.
 \begin{itemize}
 \tightlist
 \item
-  \(O \in \langle G \rangle\): VRF output point
+  \(O \in \bold{G}\): VRF output point
 \item
-  \(\pi_p \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  \(\pi_p \in (\bold{G}, \bold{G}, \bold{G}, \bold{F}, \bold{F})\):
   Pedersen proof
 \item
-  \(\pi_r \in ((G_1)^4, (\mathbb{Z}^*_r)^7, G_1, \mathbb{Z}^*_r, G_1, G_1)\):
-  Ring proof
+  \(\pi_r \in ((G_1)^4, (\bold{F})^7, G_1, \bold{F}, G_1, G_1)\): Ring
+  proof
 \end{itemize}
 
 \textbf{Steps}:
@@ -679,17 +699,17 @@ padding.
 \item
   \(V \in (G_1)^3\): Ring verifier (pre-processed commitment).
 \item
-  \(I \in \langle G \rangle\): VRF input point.
+  \(I \in \bold{G}\): VRF input point.
 \item
   \(O \in G\): VRF output point.
 \item
-  \(ad \in \Sigma^*\): Additional data octet-string.
+  \(ad \in \bold{\Sigma}^*\): Additional data octet-string.
 \item
-  \(\pi_p \in (\langle G \rangle, \langle G \rangle, \langle G \rangle, \mathbb{Z}^*_r, \mathbb{Z}^*_r)\):
+  \(\pi_p \in (\bold{G}, \bold{G}, \bold{G}, \bold{F}, \bold{F})\):
   Pedersen proof
 \item
-  \(\pi_r \in ((G_1)^4, (\mathbb{Z}^*_r)^7, G_1, \mathbb{Z}^*_r, G_1, G_1)\):
-  Ring proof
+  \(\pi_r \in ((G_1)^4, (\bold{F})^7, G_1, \bold{F}, G_1, G_1)\): Ring
+  proof
 \end{itemize}
 
 \textbf{Output}:

@@ -3,11 +3,12 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 24 Feb 2025 - Draft 25
+date: 9 Mar 2025 - Draft 26
 ---
 
-\newcommand{\G}{\langle G \rangle}
-\newcommand{\F}{\mathbb{Z}^*_r}
+\newcommand{\G}{\bold{G}}
+\newcommand{\F}{\bold{F}}
+\newcommand{\S}{\bold{\Sigma}}
 
 ---
 
@@ -28,36 +29,56 @@ specified in [MSZ21] [@MSZ21].
 # 1. Preliminaries
 
 **Definition**: A *verifiable random function with additional data (VRF-AD)*
-can be described with two functions:
+can be described by two functions:
 
 - $Prove(sk,in,ad) \mapsto (out,\pi)$ : from secret key $sk$, input $in$,
   and additional data $ad$ returns a verifiable output $out$ and proof $\pi$.
 
-- $Verify(pk,in,ad,out,\pi) \mapsto (0|1)$ : for public key $pk$, input $in$,
-  additional data $ad$, output $out$ and proof $\pi$ returns either $1$ on success
-  or $0$ on failure.
+- $Verify(pk,in,ad,out,\pi) \mapsto (\top|\bot)$ : for public key $pk$, input $in$,
+  additional data $ad$, output $out$ and proof $\pi$ returns either $\top$ on success
+  or $\bot$ on failure.
 
+## 1.1. Common definitions
 
-## 1.1. VRF Input
+- $\F$: Scalar field with prime order.
+- $\G$: Bandersnatch curve with order $|\F|$.
+- $\S^k$: Octets strings with length $k \in \mathbb{N}$ ($*$ for arbitrary length).
 
-An arbitrary length octet-string provided by the user and used to generate some
+- $G \in \G$: Prime subgroup generator point.
+- $x \in \F$: Secret key scalar.
+- $Y \gets x \cdot G \in \G$: Public key point.
+- $i \in \S^*$: VRF input data.
+- $I \in \G$: VRF input point.
+- $O \in \G$: VRF output point.
+- $o \in \S^k$: VRF output hash.
+
+## 1.2. VRF Input
+
+An arbitrary length octet-string provided by the user to generate some
 unbiasable verifiable random output.
 
-## 1.2. VRF Input Point
+## 1.3. VRF Input Point
 
 A point in $\G$ generated from VRF input octet-string using the *Elligator 2*
 *hash-to-curve* algorithm as described by section 6.8.2 of [RFC-9380] [@RFC9380].
 
-## 1.3. VRF Output Point
+$$I \gets \texttt{hash\_to\_curve}(i)$$
 
-A point in $\G$ generated from VRF input point as: $Output \gets sk \cdot Input$.
+## 1.4. VRF Output Point
+
+A point generated from VRF input point and secret key scalar.
+
+$$O \gets x \cdot I$$
 
 ## 1.4. VRF Output
 
-A fixed length octet-string generated from VRF output point using the
-proof-to-hash procedure defined in section 5.2 of [RFC-9381].
+A fixed-length octet string produced from the VRF output point using the
+*output-to-hash* procedure, which is *proof-to-hash* method described in
+Section 5.2 of [RFC-9381], but with a specific focus on the output point
+component (referred to as $Gamma$ in [RFC-9381]) extracted from the output point
+proof bundle.
 
-The first 32 bytes of the hash output are taken.
+$$o \gets \texttt{output\_to\_hash}(O)$$
 
 ## 1.5 Additional Data
 
@@ -72,7 +93,7 @@ Challenge construction mostly follows the procedure given in section 5.4.3 of
 **Input**:  
 
 - $\bar{P} \in \G^n$: Sequence of $n$ points.
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 
 **Output**:  
 
@@ -120,9 +141,9 @@ section 5.5 of [RFC-9381].
 
 - The `ECVRF_nonce_generation` function is specified in section 5.4.2.2 of [RFC-9381].
 
-- The `int_to_string` function encodes into the 32 bytes little endian representation.
+- The `int_to_string` function encodes into the 32 octets little endian representation.
  
-- The `string_to_int` function decodes from the 32 bytes little endian representation
+- The `string_to_int` function decodes from the 32 octets little endian representation
   eventually reducing modulo the prime field order.
 
 - The `point_to_string` function converts a point in $\G$ to an octet-string using
@@ -150,7 +171,7 @@ section 5.5 of [RFC-9381].
 
 - $x \in \F$: Secret key
 - $I \in \G$: VRF input point
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 
 **Output**:
 
@@ -177,7 +198,7 @@ section 5.5 of [RFC-9381].
 
 - $Y \in \G$: Public key
 - $I \in \G$: VRF input point
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 - $O \in \G$: VRF output point
 - $\pi \in (\F, \F)$: Schnorr-like proof
 
@@ -235,7 +256,7 @@ section 2.1 of this specification.
 - $x \in \F$: Secret key
 - $b \in \F$: Secret blinding factor
 - $I \in \G$: VRF input point
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 
 **Output**:
 
@@ -260,7 +281,7 @@ section 2.1 of this specification.
 **Input**:  
 
 - $I \in \G$: VRF input point
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 - $O \in \G$: VRF output point
 - $\pi \in (\G, \G, \G, \F, \F)$: Pedersen proof
 
@@ -322,15 +343,6 @@ $$_{\omega = 4930761572854476501216612180227865807071116983904168357507179523674
 
 - $|\mathbb{D}| = 2048$
 
-### 4.1.1. Short Weierstrass Form Requirement
-
-The Ring-Proof scheme, as outlined in [VG24], mandates that all points must be
-in Short Weierstrass form. Therefore, any point used in this scheme, whether
-derived from Twisted Edwards form or otherwise, must first be converted to
-Short Weierstrass form. This requirement applies to both user-related values,
-such as the ring points used by the ring public keys, and to configuration points
-like the accumulator and padding.
-
 ## 4.2. Prove
 
 **Input**:
@@ -340,7 +352,7 @@ like the accumulator and padding.
 - $k \in \mathbb{N}_k$: prover public key position within the ring
 - $b \in \F$: Secret blinding factor
 - $I \in \G$: VRF input point
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 
 **Output**:
 
@@ -360,7 +372,7 @@ like the accumulator and padding.
 - $V \in (G_1)^3$: Ring verifier (pre-processed commitment).
 - $I \in \G$: VRF input point.
 - $O \in G$: VRF output point.
-- $ad \in \Sigma^*$: Additional data octet-string.
+- $ad \in \S^*$: Additional data octet-string.
 - $\pi_p \in (\G, \G, \G, \F, \F)$: Pedersen proof
 - $\pi_r \in ((G_1)^4, (\F)^7, G_1, \F, G_1, G_1)$: Ring proof
 
