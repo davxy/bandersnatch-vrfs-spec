@@ -31,7 +31,7 @@ specified in [MSZ21] [@MSZ21].
 ## 1.1. Common definitions
 
 - $\G$: Bandersnatch curve cyclic group of prime order $r$.
-- $\F$: Scalar field with order $r$ (i.e. $\mathbb{Z}_r$).
+- $\F$: Scalar field of prime order $r$ (i.e. $\mathbb{Z}_r$).
 - $\S^k$: Octets strings with length $k \in \mathbb{N}$ ($*$ for arbitrary length).
 
 - $G \in \G$: Prime order group generator.
