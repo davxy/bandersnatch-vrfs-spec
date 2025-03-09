@@ -122,18 +122,18 @@ BLS12-381 scalar field specified in
 
 \begin{itemize}
 \item
-  \(\bold{F}\): Scalar field with prime order.
+  \(\bold{G}\): Bandersnatch curve cyclic group of prime order \(r\).
 \item
-  \(\bold{G}\): Bandersnatch curve with order \(|\bold{F}|\).
+  \(\bold{F}\): Scalar field with order \(r\) (i.e.~\(\mathbb{Z}_r\)).
 \item
   \(\bold{\Sigma}^k\): Octets strings with length \(k \in \mathbb{N}\)
   (\(*\) for arbitrary length).
 \item
-  \(G \in \bold{G}\): Prime subgroup generator point.
+  \(G \in \bold{G}\): Prime order group generator.
 \item
   \(x \in \bold{F}\): Secret key scalar.
 \item
-  \(Y \gets x \cdot G \in \bold{G}\): Public key point.
+  \(Y \in \bold{G}\): Public key point defined as \(x \cdot G\).
 \item
   \(i \in \bold{\Sigma}^*\): VRF input data.
 \item

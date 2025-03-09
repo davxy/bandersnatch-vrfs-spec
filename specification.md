@@ -30,13 +30,13 @@ specified in [MSZ21] [@MSZ21].
 
 ## 1.1. Common definitions
 
-- $\F$: Scalar field with prime order.
-- $\G$: Bandersnatch curve with order $|\F|$.
+- $\G$: Bandersnatch curve cyclic group of prime order $r$.
+- $\F$: Scalar field with order $r$ (i.e. $\mathbb{Z}_r$).
 - $\S^k$: Octets strings with length $k \in \mathbb{N}$ ($*$ for arbitrary length).
 
-- $G \in \G$: Prime subgroup generator point.
+- $G \in \G$: Prime order group generator.
 - $x \in \F$: Secret key scalar.
-- $Y \gets x \cdot G \in \G$: Public key point.
+- $Y \in \G$: Public key point defined as $x \cdot G$.
 - $i \in \S^*$: VRF input data.
 - $I \in \G$: VRF input point.
 - $O \in \G$: VRF output point.
