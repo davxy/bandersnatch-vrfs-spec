@@ -184,29 +184,31 @@ produced VRF output.
 
 \subsection{1.6. VRF-AD}\label{vrf-ad}
 
-A \emph{verifiable random function with additional data (VRF-AD)} can be
-described by three functions:
+Regardless of the specific scheme, a \emph{Verifiable Random Function
+with Additional Data (VRF-AD)} can be concisely represented by three
+primary functions:
 
 \begin{itemize}
 \tightlist
 \item
   \(prove(x, i, ad) \mapsto \Pi\)
 \item
-  \(verify(y, i, ad, \Pi) \mapsto (\top|\bot)\)
+  \(verify(y, i, ad, \Pi) \mapsto (\top \mid \bot)\)
 \item
   \(output(\Pi) \mapsto o\)
 \end{itemize}
 
-Where:
+Here:
 
 \begin{itemize}
 \tightlist
 \item
-  \(y \gets \texttt{serialize\_compressed}(Y)\)
+  \(y \gets \texttt{serialize\_compressed}(Y)\), where \(Y\) is the
+  public key corresponding to the private key used for proving.
 \item
-  \(\Pi \gets \texttt{encode\_compressed}((O, \pi))\)
-\item
-  \(\pi\): specific scheme proof
+  \(\Pi \gets \texttt{encode\_compressed}((O, \pi))\), where \(\pi\) is
+  the proof specific to the underlying scheme, and \(O\) represents the
+  VRF output point.
 \end{itemize}
 
 \subsection{1.7. Challenge Procedure}\label{challenge-procedure}

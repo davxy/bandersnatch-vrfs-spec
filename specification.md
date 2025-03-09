@@ -77,18 +77,19 @@ the generated VRF output. This data doesn't influence the produced VRF output.
 
 ## 1.6. VRF-AD
 
-A *verifiable random function with additional data (VRF-AD)* can be described by
-three functions:
+Regardless of the specific scheme, a *Verifiable Random Function with Additional
+Data (VRF-AD)* can be concisely represented by three primary functions:
 
 - $prove(x, i, ad) \mapsto \Pi$
-- $verify(y, i, ad, \Pi) \mapsto (\top|\bot)$
+- $verify(y, i, ad, \Pi) \mapsto (\top \mid \bot)$
 - $output(\Pi) \mapsto o$
 
-Where:
+Here:
 
-- $y \gets \texttt{serialize\_compressed}(Y)$
-- $\Pi \gets \texttt{encode\_compressed}((O, \pi))$
-- $\pi$: specific scheme proof
+- $y \gets \texttt{serialize\_compressed}(Y)$, where $Y$ is the public key
+  corresponding to the private key used for proving.
+- $\Pi \gets \texttt{encode\_compressed}((O, \pi))$, where $\pi$ is the proof
+  specific to the underlying scheme, and $O$ represents the VRF output point.
 
 ## 1.7. Challenge Procedure
 
