@@ -5,8 +5,8 @@ use ark_ec_vrfs::reexports::{
 use ark_ec_vrfs::ring::RingSuite;
 use ark_ec_vrfs::{pedersen::PedersenSuite, suites::bandersnatch};
 use bandersnatch::{
-    AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingContext, RingProof,
-    Secret,
+    AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof,
+    RingProofParams, Secret,
 };
 
 const RING_SIZE: usize = 1023;
@@ -28,11 +28,11 @@ struct RingVrfSignature {
     proof: RingProof,
 }
 
-// "Static" ring context data
-fn ring_context() -> &'static RingContext {
+// "Static" ring proof parameters.
+fn ring_proof_params() -> &'static RingProofParams {
     use std::sync::OnceLock;
-    static RING_CTX: OnceLock<RingContext> = OnceLock::new();
-    RING_CTX.get_or_init(|| {
+    static PARAMS: OnceLock<RingProofParams> = OnceLock::new();
+    PARAMS.get_or_init(|| {
         use bandersnatch::PcsParams;
         use std::{fs::File, io::Read};
         let manifest_dir =
@@ -42,7 +42,7 @@ fn ring_context() -> &'static RingContext {
         let mut buf = Vec::new();
         file.read_to_end(&mut buf).unwrap();
         let pcs_params = PcsParams::deserialize_uncompressed_unchecked(&mut &buf[..]).unwrap();
-        RingContext::from_srs(RING_SIZE, pcs_params).unwrap()
+        RingProofParams::from_pcs_params(RING_SIZE, pcs_params).unwrap()
     })
 }
 
@@ -87,9 +87,9 @@ impl Prover {
         let pts: Vec<_> = self.ring.iter().map(|pk| pk.0).collect();
 
         // Proof construction
-        let ring_ctx = ring_context();
-        let prover_key = ring_ctx.prover_key(&pts);
-        let prover = ring_ctx.prover(prover_key, self.prover_idx);
+        let params = ring_proof_params();
+        let prover_key = params.prover_key(&pts);
+        let prover = params.prover(prover_key, self.prover_idx);
         let proof = self.secret.prove(input, output, aux_data, &prover);
 
         // Output and Ring Proof bundled together (as per section 2.2)
@@ -131,7 +131,7 @@ impl Verifier {
     fn new(ring: Vec<Public>) -> Self {
         // Backend currently requires the wrapped type (plain affine points)
         let pts: Vec<_> = ring.iter().map(|pk| pk.0).collect();
-        let verifier_key = ring_context().verifier_key(&pts);
+        let verifier_key = ring_proof_params().verifier_key(&pts);
         let commitment = verifier_key.commitment();
         Self { ring, commitment }
     }
@@ -154,15 +154,15 @@ impl Verifier {
         let input = vrf_input_point(vrf_input_data);
         let output = signature.output;
 
-        let ring_ctx = ring_context();
+        let params = ring_proof_params();
 
         // The verifier key is reconstructed from the commitment and the constant
         // verifier key component of the SRS in order to verify some proof.
         // As an alternative we can construct the verifier key using the
-        // RingContext::verifier_key() method, but is more expensive.
+        // RingProofParams::verifier_key() method, but is more expensive.
         // In other words, we prefer computing the commitment once, when the keyset changes.
-        let verifier_key = ring_ctx.verifier_key_from_commitment(self.commitment.clone());
-        let verifier = ring_ctx.verifier(verifier_key);
+        let verifier_key = params.verifier_key_from_commitment(self.commitment.clone());
+        let verifier = params.verifier(verifier_key);
         if Public::verify(input, output, aux_data, &signature.proof, &verifier).is_err() {
             println!("Ring signature verification failure");
             return Err(());
@@ -252,7 +252,7 @@ fn main() {
     let prover_key_index = 3;
 
     // NOTE: any key can be replaced with the padding point
-    let padding_point = Public::from(RingContext::padding_point());
+    let padding_point = Public::from(RingProofParams::padding_point());
     ring[2] = padding_point;
     ring[7] = padding_point;
 
