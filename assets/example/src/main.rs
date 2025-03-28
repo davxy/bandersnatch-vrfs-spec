@@ -1,9 +1,8 @@
-use ark_ec_vrfs::reexports::{
+use ark_vrf::reexports::{
     ark_ec::AffineRepr,
     ark_serialize::{self, CanonicalDeserialize, CanonicalSerialize},
 };
-use ark_ec_vrfs::ring::RingSuite;
-use ark_ec_vrfs::{pedersen::PedersenSuite, suites::bandersnatch};
+use ark_vrf::{pedersen::PedersenSuite, ring::RingSuite, suites::bandersnatch};
 use bandersnatch::{
     AffinePoint, BandersnatchSha512Ell2, IetfProof, Input, Output, Public, RingProof,
     RingProofParams, Secret,
@@ -12,7 +11,7 @@ use bandersnatch::{
 const RING_SIZE: usize = 1023;
 
 // This is the IETF `Prove` procedure output as described in section 2.2
-// of the Bandersnatch VRFs specification
+// of the Bandersnatch VRF specification
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 struct IetfVrfSignature {
     output: Output,
@@ -20,7 +19,7 @@ struct IetfVrfSignature {
 }
 
 // This is the IETF `Prove` procedure output as described in section 4.2
-// of the Bandersnatch VRFs specification
+// of the Bandersnatch VRF specification
 #[derive(CanonicalSerialize, CanonicalDeserialize)]
 struct RingVrfSignature {
     output: Output,
@@ -78,7 +77,7 @@ impl Prover {
     ///
     /// Used for tickets submission.
     pub fn ring_vrf_sign(&self, vrf_input_data: &[u8], aux_data: &[u8]) -> Vec<u8> {
-        use ark_ec_vrfs::ring::Prover as _;
+        use ark_vrf::ring::Prover as _;
 
         let input = vrf_input_point(vrf_input_data);
         let output = self.secret.output(input);
@@ -104,7 +103,7 @@ impl Prover {
     /// Used for ticket claiming during block production.
     /// Not used with Safrole test vectors.
     pub fn ietf_vrf_sign(&self, vrf_input_data: &[u8], aux_data: &[u8]) -> Vec<u8> {
-        use ark_ec_vrfs::ietf::Prover as _;
+        use ark_vrf::ietf::Prover as _;
 
         let input = vrf_input_point(vrf_input_data);
         let output = self.secret.output(input);
@@ -119,7 +118,7 @@ impl Prover {
     }
 }
 
-type RingCommitment = ark_ec_vrfs::ring::RingCommitment<BandersnatchSha512Ell2>;
+type RingCommitment = ark_vrf::ring::RingCommitment<BandersnatchSha512Ell2>;
 
 // Verifier actor.
 struct Verifier {
@@ -147,7 +146,7 @@ impl Verifier {
         aux_data: &[u8],
         signature: &[u8],
     ) -> Result<[u8; 32], ()> {
-        use ark_ec_vrfs::ring::Verifier as _;
+        use ark_vrf::ring::Verifier as _;
 
         let signature = RingVrfSignature::deserialize_compressed(signature).unwrap();
 
@@ -188,7 +187,7 @@ impl Verifier {
         signature: &[u8],
         signer_key_index: usize,
     ) -> Result<[u8; 32], ()> {
-        use ark_ec_vrfs::ietf::Verifier as _;
+        use ark_vrf::ietf::Verifier as _;
 
         let signature = IetfVrfSignature::deserialize_compressed(signature).unwrap();
 

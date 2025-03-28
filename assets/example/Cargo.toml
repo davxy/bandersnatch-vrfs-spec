@@ -1,13 +1,14 @@
 [package]
-name = "ark-ec-vrfs-bandersnatch-example"
-version = "0.1.1"
+name = "ark-vrf-bandersnatch-example"
+version = "0.1.0"
 edition = "2021"
+publish =  false
 
 [dependencies]
-ark-ec-vrfs ={ version = "0.1.2", features = ["bandersnatch", "ring"] }
+ark-vrf ={ version = "0.1.0", features = ["bandersnatch", "ring"] }
 hex = "0.4.3"
 
 # Deterministic ring proof.
 # WARNING: not for production, used to produce specification test vectors.
 [features]
-test-vectors = ["ark-ec-vrfs/test-vectors"]
+test-vectors = ["ark-vrf/test-vectors"]

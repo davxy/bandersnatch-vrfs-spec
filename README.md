@@ -22,7 +22,7 @@ specified in [MSZ21] [@MSZ21].
 
 ## References
 
-* [Reference Implementation](https://github.com/davxy/ark-ec-vrfs)
+* [Reference Implementation](https://github.com/davxy/ark-vrf)
 * [RFC-9380](https://datatracker.ietf.org/doc/rfc9380)
 * [RFC-9381](https://datatracker.ietf.org/doc/rfc9381)
 * [BCHSV23](https://eprint.iacr.org/2023/002)

@@ -3,7 +3,7 @@ title: Bandersnatch VRF-AD Specification
 author:
   - Davide Galassi
   - Seyed Hosseini
-date: 9 Mar 2025 - Draft 26
+date: 28 Mar 2025 - Draft 27
 ---
 
 \newcommand{\G}{\bold{G}}
@@ -396,8 +396,8 @@ $$_{\omega = 4930761572854476501216612180227865807071116983904168357507179523674
 
 # Appendix A
 
-The test vectors in this section were generated using `ark-ec-vrfs` libraries
-revision [`d90e180`](https://github.com/davxy/ark-ec-vrfs/tree/d90e1800d571f32163e6f7b5d956d065668c899f).
+The test vectors in this section were generated using `ark-ec-vrf` libraries
+revision [`bf2d1cf`](https://github.com/davxy/ark-vrf/tree/bf2d1cf8ec648cf57b0eb1252639798481e05a29).
 
 ## A.1. IETF VRF Test Vectors
 
