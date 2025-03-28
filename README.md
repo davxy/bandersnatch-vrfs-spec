@@ -1,4 +1,4 @@
-# Bandersnatch VRF-AD Specification
+# Bandersnatch VRF Specification
 
 This specification delineates the framework for a Verifiable Random Function with
 Additional Data (VRF-AD), a cryptographic construct that augments a standard VRF
